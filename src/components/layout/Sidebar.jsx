@@ -1,7 +1,7 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard, Package, ShoppingBag, Users,
+  LayoutDashboard, Package, ShoppingBag, Users, Layout,
   Tag, Star, BarChart2, Settings, LogOut, Gem,
   ChevronRight,
 } from "lucide-react";
@@ -12,6 +12,7 @@ const nav = [
   { label: "Analytics",   href: "/analytics",  icon: BarChart2 },
   { group: "Catalogue" },
   { label: "Products",    href: "/products",   icon: Package },
+  { label: "Page Builder", href: "/page-builder", icon: Layout },
   { group: "Commerce" },
   { label: "Orders",      href: "/orders",     icon: ShoppingBag },
   { label: "Customers",   href: "/customers",  icon: Users },

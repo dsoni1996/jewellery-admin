@@ -10,7 +10,8 @@ const titles = {
   "/customers":  "Customers",
   "/coupons":    "Coupons",
   "/reviews":    "Reviews",
-  "/settings":   "Settings",
+  "/settings":      "Settings",
+  "/page-builder": "Page Builder",
 };
 
 const S = `

@@ -22,6 +22,16 @@ async function req(path, opts = {}) {
   return data;
 }
 
+/* Both names work — homepage is the legacy alias */
+const homeSectionApi = {
+  getConfig:     ()         => req("/homepage/config"),
+  saveConfig:    (sections) => req("/homepage/config",         { method: "PUT",    body: { sections } }),
+  addSection:    (body)     => req("/homepage/sections",        { method: "POST",   body }),
+  updateSection: (id, body) => req(`/homepage/sections/${id}`,  { method: "PUT",    body }),
+  removeSection: (id)       => req(`/homepage/sections/${id}`,  { method: "DELETE" }),
+  reset:         ()         => req("/homepage/reset",           { method: "POST"   }),
+};
+
 export const api = {
   auth: {
     login:  (body) => req("/auth/login", { method: "POST", body }),
@@ -53,4 +63,6 @@ export const api = {
     getUsers:       (p={}) => req(`/admin/users?${new URLSearchParams(p)}`),
     toggleUser:     (id)   => req(`/admin/users/${id}/status`, { method: "PATCH" }),
   },
+  homeSection: homeSectionApi,
+  homepage:    homeSectionApi,
 };

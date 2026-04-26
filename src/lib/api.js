@@ -34,35 +34,70 @@ const homeSectionApi = {
 
 export const api = {
   auth: {
-    login:  (body) => req("/auth/login", { method: "POST", body }),
-    me:     ()     => req("/auth/me"),
-    logout: ()     => req("/auth/logout", { method: "POST" }),
+    login: (body) => req("/auth/login", { method: "POST", body }),
+    me: () => req("/auth/me"),
+    logout: () => req("/auth/logout", { method: "POST" }),
   },
   products: {
-    getAll:  (p = {}) => req(`/products?${new URLSearchParams(p)}`),
-    getOne:  (slug)   => req(`/products/${slug}`),
-    create:  (body)   => req("/products",     { method: "POST",   body }),
-    update:  (id, b)  => req(`/products/${id}`, { method: "PUT",  body: b }),
-    remove:  (id)     => req(`/products/${id}`, { method: "DELETE" }),
+    getAll: (p = {}) => req(`/products?${new URLSearchParams(p)}`),
+    getOne: (slug) => req(`/products/${slug}`),
+    create: (body) => req("/products", { method: "POST", body }),
+    update: (id, b) => req(`/products/${id}`, { method: "PUT", body: b }),
+    remove: (id) => req(`/products/${id}`, { method: "DELETE" }),
   },
   orders: {
-    getAll:       (p = {}) => req(`/orders/admin/all?${new URLSearchParams(p)}`),
-    getOne:       (num)    => req(`/orders/${num}`),
-    updateStatus: (id, b)  => req(`/orders/admin/${id}/status`, { method: "PUT", body: b }),
+    getAll: (p = {}) => req(`/orders/admin/all?${new URLSearchParams(p)}`),
+    getOne: (num) => req(`/orders/${num}`),
+    updateStatus: (id, b) =>
+      req(`/orders/admin/${id}/status`, { method: "PUT", body: b }),
   },
   users: {
     // using auth/me pattern — in real app add GET /api/users admin route
     getAll: (p = {}) => req(`/auth/admin/users?${new URLSearchParams(p)}`),
   },
   stats: {
-    getSummary:    ()      => req("/admin/stats"),
-    getMonthly:    ()      => req("/admin/stats/monthly"),
-    getCategories: ()      => req("/admin/stats/categories"),
+    getSummary: () => req("/admin/stats"),
+    getMonthly: () => req("/admin/stats/monthly"),
+    getCategories: () => req("/admin/stats/categories"),
   },
   admin: {
-    getUsers:       (p={}) => req(`/admin/users?${new URLSearchParams(p)}`),
-    toggleUser:     (id)   => req(`/admin/users/${id}/status`, { method: "PATCH" }),
+    getUsers: (p = {}) => req(`/admin/users?${new URLSearchParams(p)}`),
+    toggleUser: (id) => req(`/admin/users/${id}/status`, { method: "PATCH" }),
   },
   homeSection: homeSectionApi,
-  homepage:    homeSectionApi,
+  homepage: homeSectionApi,
+
+  navApi: {
+    get: () => req("/nav"),
+    save: (body) => req("/nav", { method: "PUT", body }),
+    reset: () => req("/nav/reset", { method: "POST" }),
+    getAdmin: () => req("/nav/admin"),
+  },
+
+  contactApi :{
+  // Public
+  submit:       (body)        => req("/contact",              { method: "POST",   body }),
+  getFaqs:      ()            => req("/contact/faqs"),
+  getStores:    ()            => req("/contact/stores"),
+
+  // Admin — submissions
+  getAll:       (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return req(`/contact${qs ? `?${qs}` : ""}`);
+  },
+  updateStatus: (id, status)  => req(`/contact/${id}/status`, { method: "PATCH",  body: { status } }),
+
+  // Admin — FAQs
+  createFaq:    (body)        => req("/contact/faqs",          { method: "POST",   body }),
+  updateFaq:    (id, body)    => req(`/contact/faqs/${id}`,    { method: "PUT",    body }),
+  deleteFaq:    (id)          => req(`/contact/faqs/${id}`,    { method: "DELETE"       }),
+
+  // Admin — Stores
+  createStore:  (body)        => req("/contact/stores",        { method: "POST",   body }),
+  updateStore:  (id, body)    => req(`/contact/stores/${id}`,  { method: "PUT",    body }),
+  deleteStore:  (id)          => req(`/contact/stores/${id}`,  { method: "DELETE"       }),
+
+  // Seed (run once)
+  seed:         ()            => req("/contact/seed",          { method: "POST"         }),
+}
 };

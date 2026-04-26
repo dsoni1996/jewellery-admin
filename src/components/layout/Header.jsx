@@ -12,6 +12,7 @@ const titles = {
   "/reviews":    "Reviews",
   "/settings":      "Settings",
   "/page-builder": "Page Builder",
+  "/nav-builder":  "Nav Builder",
 };
 
 const S = `

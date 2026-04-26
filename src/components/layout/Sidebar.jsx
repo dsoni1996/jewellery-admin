@@ -1,9 +1,9 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard, Package, ShoppingBag, Users, Layout,
+  LayoutDashboard, Package, ShoppingBag, Users, Layout, Link as LinkIcon,
   Tag, Star, BarChart2, Settings, LogOut, Gem,
-  ChevronRight,
+  ChevronRight,Headset
 } from "lucide-react";
 
 const nav = [
@@ -13,6 +13,8 @@ const nav = [
   { group: "Catalogue" },
   { label: "Products",    href: "/products",   icon: Package },
   { label: "Page Builder", href: "/page-builder", icon: Layout },
+  { label: "Nav Builder",  href: "/nav-builder",  icon: LinkIcon },
+  {label: "Wedding builder", href: "/wedding-builder", icon: LinkIcon},
   { group: "Commerce" },
   { label: "Orders",      href: "/orders",     icon: ShoppingBag },
   { label: "Customers",   href: "/customers",  icon: Users },
@@ -20,6 +22,7 @@ const nav = [
   { label: "Reviews",     href: "/reviews",    icon: Star },
   { group: "System" },
   { label: "Settings",    href: "/settings",   icon: Settings },
+  { label: "Contact Management", href: "/contact-management", icon: Headset },
 ];
 
 const S = `

@@ -13,6 +13,7 @@ const titles = {
   "/settings":      "Settings",
   "/page-builder": "Page Builder",
   "/nav-builder":  "Nav Builder",
+  "/wedding-builder": "Wedding Builder"
 };
 
 const S = `

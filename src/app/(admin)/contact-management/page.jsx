@@ -576,6 +576,17 @@ export default function ContactManagementPage() {
                 />
               </div>
               <div className="frm-field">
+                <label className="enq-label">Store Email</label>
+                <input
+                  className="frm-input"
+                  value={editStore.email || ""}
+                  onChange={(e) =>
+                    setEditStore({ ...editStore, email: e.target.value })
+                  }
+                  placeholder="care@manasjewellery.com"
+                />
+              </div>
+              <div className="frm-field">
                 <label className="enq-label">Phone Number</label>
                 <input
                   required

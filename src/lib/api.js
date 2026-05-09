@@ -99,5 +99,12 @@ export const api = {
 
   // Seed (run once)
   seed:         ()            => req("/contact/seed",          { method: "POST"         }),
-}
+},
+
+  weddingPage: {
+    getConfig:   ()      => req("/wedding/config/admin"),
+    saveConfig:  (body)  => req("/wedding/config",        { method: "PUT",  body }),
+    resetConfig: ()      => req("/wedding/config/reset",  { method: "POST" }),
+    seed:        ()      => req("/wedding/seed",          { method: "POST" }),
+  },
 };

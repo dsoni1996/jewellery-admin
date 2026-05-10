@@ -1,10 +1,10 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Plus, Search, X, Edit2, Trash2, Eye, EyeOff,
   Loader2, Check, AlertCircle, Star,
   Save, Package, Image, Settings, ExternalLink,
-  Layout,
+  Layout,Upload
 } from "lucide-react";
 import { api } from "../../../lib/api";
 import { Badge, Modal, Toggle, Pagination } from "../../../components/common";
@@ -20,6 +20,7 @@ const PURITIES   = ["22KT","18KT","14KT","24KT"];
 const METALS     = ["Yellow Gold","White Gold","Rose Gold"];
 const BADGES     = ["Bestseller","New","Limited","Exclusive","Top Rated"];
 const LIMIT = 20;
+const BASE       = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 /* ══════════════════════════════════════════
    STYLES — matched to Page Builder
@@ -158,7 +159,158 @@ const S = `
 
 /* ── Bottom spacer for save bar ── */
 .wa-spacer { height: 80px; }
+
+/* ── Image uploader ── */
+.img-upload-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+.img-thumb-wrap{position:relative;width:72px;height:72px;flex-shrink:0;}
+.img-thumb{width:100%;height:100%;object-fit:cover;border-radius:var(--radius);border:1px solid var(--border);display:block;background:var(--bg);}
+.img-thumb-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;transition:transform .15s;}
+.img-thumb-del:hover{transform:scale(1.15);}
+.img-thumb-primary{position:absolute;bottom:2px;left:2px;background:rgba(44,26,14,.75);color:#D4AF6A;font-size:8px;letter-spacing:.5px;padding:1px 5px;border-radius:2px;}
+.img-upload-btn{width:72px;height:72px;border:1.5px dashed var(--border);border-radius:var(--radius);background:var(--bg);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--gold);transition:all .2s;flex-shrink:0;}
+.img-upload-btn:hover{border-color:var(--gold);background:var(--gold-pale);}
+.img-upload-btn:disabled{opacity:.5;cursor:not-allowed;}
+.img-upload-btn span{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);}
+.img-url-row{display:flex;gap:8px;margin-top:4px;}
+.img-sep{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:11px;color:var(--text3);}
+.img-sep::before,.img-sep::after{content:'';flex:1;height:1px;background:var(--border);}
+.img-upload-progress{height:2px;background:var(--gold-pale);border-radius:1px;overflow:hidden;margin-top:4px;}
+.img-upload-progress-bar{height:100%;background:var(--gold);transition:width .3s ease;}
 `;
+
+
+/* ── Image Uploader Component ── */
+function ImageUploader({ thumbnail, images = [], onThumbChange, onImagesChange }) {
+  const fileRef    = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [progress,  setProgress]  = useState(0);
+  const [urlInput,  setUrlInput]  = useState("");
+  const [urlErr,    setUrlErr]    = useState("");
+
+  const uploadFiles = async (files) => {
+    if (!files?.length) return;
+    setUploading(true); setProgress(0);
+    const uploaded = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.size > 5 * 1024 * 1024) { alert(`${file.name} is over 5MB`); continue; }
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        const token = localStorage.getItem("admin_token");
+        const res = await fetch(`${BASE}/upload/single`, {
+          method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success && data.url) uploaded.push(data.url);
+      } catch (e) {
+        console.error("Upload failed:", e);
+      }
+      setProgress(Math.round(((i + 1) / files.length) * 100));
+    }
+
+    if (uploaded.length) {
+      const allImgs = [...images, ...uploaded];
+      onImagesChange(allImgs);
+      if (!thumbnail) onThumbChange(allImgs[0]);
+    }
+    setUploading(false); setProgress(0);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const addUrl = () => {
+    setUrlErr("");
+    const url = urlInput.trim();
+    if (!url) return;
+    if (!url.startsWith("http")) { setUrlErr("Enter a valid URL starting with http"); return; }
+    const allImgs = [...images, url];
+    onImagesChange(allImgs);
+    if (!thumbnail) onThumbChange(url);
+    setUrlInput("");
+  };
+
+  const removeImg = (idx) => {
+    const next = images.filter((_, i) => i !== idx);
+    onImagesChange(next);
+    if (thumbnail === images[idx]) onThumbChange(next[0] || "");
+  };
+
+  const setAsThumbnail = (url) => onThumbChange(url);
+
+  return (
+    <div>
+      {/* Image thumbs */}
+      <div className="img-upload-grid">
+        {images.map((url, i) => (
+          <div key={i} className="img-thumb-wrap" title="Click to set as thumbnail">
+            <img src={url} alt="" className="img-thumb" onClick={() => setAsThumbnail(url)} style={{ cursor:"pointer" }} />
+            {thumbnail === url && <span className="img-thumb-primary">Main</span>}
+            <button className="img-thumb-del" onClick={() => removeImg(i)} type="button">✕</button>
+          </div>
+        ))}
+
+        {/* Upload button */}
+        {images.length < 6 && (
+          <button
+            type="button"
+            className="img-upload-btn"
+            disabled={uploading}
+            onClick={() => fileRef.current?.click()}
+          >
+            {uploading
+              ? <Loader2 size={18} style={{ animation:"spin .8s linear infinite" }} />
+              : <Upload size={18} />
+            }
+            <span>{uploading ? "Uploading" : "Upload"}</span>
+          </button>
+        )}
+      </div>
+
+      {/* Progress bar */}
+      {uploading && (
+        <div className="img-upload-progress">
+          <div className="img-upload-progress-bar" style={{ width: `${progress}%` }} />
+        </div>
+      )}
+
+      {/* Hidden file input */}
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        multiple
+        style={{ display:"none" }}
+        onChange={e => uploadFiles(e.target.files)}
+      />
+
+      {/* OR paste URL */}
+      <div className="img-sep">or paste URL</div>
+      <div className="img-url-row">
+        <input
+          className="form-input"
+          style={{ fontSize:12 }}
+          placeholder="https://example.com/image.jpg"
+          value={urlInput}
+          onChange={e => { setUrlInput(e.target.value); setUrlErr(""); }}
+          onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addUrl())}
+        />
+        <button type="button" className="btn btn-outline btn-sm" onClick={addUrl}>
+          <Plus size={13} />
+        </button>
+      </div>
+      {urlErr && <p style={{ fontSize:11, color:"var(--red)", marginTop:4 }}>{urlErr}</p>}
+
+      <p style={{ fontSize:11, color:"var(--text3)", marginTop:6 }}>
+        {images.length}/6 images · Click image to set as main thumbnail · Max 5MB each
+      </p>
+    </div>
+  );
+}
 
 /* ─── Empty form ─── */
 const emptyForm = () => ({
@@ -292,11 +444,24 @@ function ProductForm({ form, setForm, err }) {
           <input className="wa-input" type="number" value={form.makingCharges} onChange={sf("makingCharges")} placeholder="14200" /></div>
       </div>
 
-      <p className="wa-form-sep"><Image size={13} /> Images</p>
+      {/* <p className="wa-form-sep"><Image size={13} /> Images</p>
       <div className="wa-field" style={{ marginBottom:10 }}>
         <label className="wa-label">Thumbnail URL *</label>
         <input className="wa-input" value={form.thumbnail} onChange={sf("thumbnail")} placeholder="https://..." />
-      </div>
+      </div> */}
+
+        {/* Images */}
+              <div className="form-field" style={{ marginBottom:16 }}>
+                <label className="form-label" style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8 }}>
+                  <Image size={12} /> Product Images
+                </label>
+                <ImageUploader
+                  thumbnail={form.thumbnail}
+                  images={form.images || []}
+                  onThumbChange={url => setForm(p => ({ ...p, thumbnail: url }))}
+                  onImagesChange={imgs => setForm(p => ({ ...p, images: imgs }))}
+                />
+              </div>
       <div className="wa-field">
         <label className="wa-label">Gallery Images</label>
         <div className="wa-img-list">

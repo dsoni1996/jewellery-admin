@@ -28,9 +28,12 @@ const S = `
 .hdr-notif { position:relative; }
 .hdr-notif-dot { position:absolute; top:4px; right:4px; width:7px; height:7px; border-radius:50%; background:var(--gold); border:2px solid var(--white); }
 .hdr-gold-line { position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold) 20%,var(--gold-light) 50%,var(--gold) 80%,transparent); }
+@media(max-width:900px){
+  .hdr-menu-btn { display:flex !important; }
+}
 `;
 
-export default function Header() {
+export default function Header({ onMenuClick }) {
   const path = usePathname();
   const base = "/" + path.split("/")[1];
   const title = titles[base] || "Admin";
@@ -39,16 +42,26 @@ export default function Header() {
     <>
       <style>{S}</style>
       <header className="hdr" style={{ position: "relative" }}>
+          <button
+        onClick={onMenuClick}
+        style={{
+          display:"none", background:"none", border:"none",
+          color:"var(--gold-light)", cursor:"pointer", padding:"4px 8px",
+        }}
+        className="hdr-menu-btn"
+      >
+        ☰
+      </button>
         <h1 className="hdr-title">
           {title.split(" ").map((w, i) =>
             i === title.split(" ").length - 1 ? <em key={i}> {w}</em> : w + " "
           )}
         </h1>
 
-        <div className="hdr-search">
+        {/* <div className="hdr-search">
           <Search size={13} style={{ color: "var(--text3)", flexShrink: 0 }} />
           <input placeholder="Search anything…" />
-        </div>
+        </div> */}
 
         <button className="hdr-icon-btn"><RefreshCw size={14} /></button>
 

@@ -48,9 +48,14 @@ const S = `
 .sb-user-role { font-size:10px; color:rgba(255,255,255,0.35); letter-spacing:1px; text-transform:uppercase; }
 .sb-logout { display:flex; align-items:center; gap:8px; background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.3); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-family:var(--font-sans); padding:0; transition:color 0.2s; width:100%; }
 .sb-logout:hover { color:var(--red-bg); }
+
+@media(max-width:900px){
+  .sb { transform:translateX(-100%); transition:transform .28s cubic-bezier(.4,0,.2,1); }
+  .sb.open { transform:translateX(0); }
+}
 `;
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const path   = usePathname();
   const router = useRouter();
 
@@ -62,11 +67,24 @@ export default function Sidebar() {
   return (
     <>
       <style>{S}</style>
-      <aside className="sb">
+   
+      <aside    className={`sb${isOpen ? " open" : ""}`}>
         <div className="sb-logo">
           <div className="sb-logo-icon"><Gem size={14} /></div>
           <span className="sb-logo-name">MAN<span>A</span>S</span>
           <span className="sb-badge">ADMIN</span>
+
+             <button
+            onClick={onClose}
+            style={{
+              marginLeft:"auto", background:"none", border:"none",
+              color:"rgba(255,255,255,0.4)", cursor:"pointer",
+              display:"none",  // CSS se mobile pe show karenge
+            }}
+            className="sb-close-btn"
+          >
+            ✕
+          </button>
         </div>
 
         <nav className="sb-nav">

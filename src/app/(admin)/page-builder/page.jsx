@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   GripVertical, Eye, EyeOff, Settings2, Trash2, Plus,
   Save, RotateCcw, Check, Loader2, ChevronDown, ChevronUp,
-  Layout, AlertCircle, ExternalLink, X, Menu, ArrowLeft,
+  Layout, AlertCircle, ExternalLink, X, Menu, ArrowLeft,Upload
 } from "lucide-react";
 import { api } from "../../../lib/api";
 
@@ -143,7 +143,126 @@ const S = `
 /* Mobile top bar for add button */
 .pb-mobile-topbar { display:none; align-items:center; justify-content:space-between; margin-bottom:16px; }
 @media(max-width:900px) { .pb-mobile-topbar { display:flex; } }
+
+
+/* ── Image Uploader ── */
+.pb-img-uploader { display: flex; flex-direction: column; gap: 0; }
+.pb-img-preview { position: relative; width: 100%; aspect-ratio: 16/7; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); background: var(--bg); margin-bottom: 8px; }
+.pb-img-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pb-img-preview-empty { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; flex-direction: column; gap: 6px; }
+.pb-img-preview-del { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 50%; background: rgba(44,26,14,.75); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; transition: background .15s; }
+.pb-img-preview-del:hover { background: var(--red); }
+.pb-img-actions { display: flex; gap: 6px; margin-bottom: 6px; }
+.pb-img-upload-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--white); border: 1px solid var(--border); padding: 7px 10px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text2); cursor: pointer; border-radius: var(--radius); font-family: var(--font-sans); transition: all .15s; }
+.pb-img-upload-btn:hover { border-color: var(--gold); color: var(--gold); }
+.pb-img-upload-btn:disabled { opacity: .5; cursor: not-allowed; }
+.pb-img-progress { height: 2px; background: var(--gold-pale,#fdf3e0); border-radius: 1px; overflow: hidden; margin-bottom: 6px; }
+.pb-img-progress-bar { height: 100%; background: var(--gold); transition: width .3s ease; }
+.pb-img-url-row { display: flex; gap: 6px; }
+.pb-img-sep { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 10px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.pb-img-sep::before, .pb-img-sep::after { content:''; flex:1; height:1px; background:var(--border); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-spin { animation: spin .8s linear infinite; }
 `;
+
+/* ══════════════════════════════════════════
+   IMAGE UPLOADER — single image, reusable
+   value: current URL string
+   onChange: (url: string) => void
+   aspect: CSS aspect-ratio string for preview box (default "16/7")
+══════════════════════════════════════════ */
+
+
+function ImageUploader({ value, onChange, aspect = "16/7", placeholder = "No image" }) {
+  const BASE       = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const fileRef   = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [progress,  setProgress]  = useState(0);
+  const [urlInput,  setUrlInput]  = useState("");
+  const [urlErr,    setUrlErr]    = useState("");
+ 
+  const uploadFile = async (file) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert(`${file.name} exceeds 5 MB`); return; }
+    setUploading(true); setProgress(10);
+    try {
+      const token    = typeof window !== "undefined" && localStorage.getItem("admin_token");
+      const formData = new FormData();
+      formData.append("image", file);
+      const res  = await fetch(`${BASE}/upload/single`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      setProgress(80);
+      const data = await res.json();
+      if (data.success && data.url) { onChange(data.url); setProgress(100); }
+      else throw new Error(data.message || "Upload failed");
+    } catch (e) {
+      alert("Upload failed: " + e.message);
+    } finally {
+      setUploading(false); setProgress(0);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+ 
+  const handleUrl = () => {
+    setUrlErr("");
+    const url = urlInput.trim();
+    if (!url) return;
+    if (!url.startsWith("http")) { setUrlErr("Enter a valid URL starting with http"); return; }
+    onChange(url);
+    setUrlInput("");
+  };
+ 
+  return (
+    <div className="pb-img-uploader">
+      {/* Preview */}
+      <div className="pb-img-preview" style={{ aspectRatio: aspect }}>
+        {value
+          ? <>
+              <img src={value} alt="preview" />
+              <button className="pb-img-preview-del" type="button" onClick={() => onChange("")}>✕</button>
+            </>
+          : <div className="pb-img-preview-empty">
+              <span style={{ fontSize:20, opacity:.3 }}>🖼</span>
+              <span>{placeholder}</span>
+            </div>
+        }
+      </div>
+ 
+      {/* Upload + progress */}
+      <div className="pb-img-actions">
+        <button type="button" className="pb-img-upload-btn" disabled={uploading}
+          onClick={() => fileRef.current?.click()}>
+          {uploading
+            ? <><Loader2 size={12} className="loader-spin" /> Uploading {progress}%</>
+            : <><Upload size={12} /> Upload Image</>
+          }
+        </button>
+      </div>
+      {uploading && (
+        <div className="pb-img-progress">
+          <div className="pb-img-progress-bar" style={{ width: `${progress}%` }} />
+        </div>
+      )}
+ 
+      <input ref={fileRef} type="file" accept="image/*" style={{ display:"none" }}
+        onChange={e => uploadFile(e.target.files?.[0])} />
+ 
+      {/* URL fallback */}
+      <div className="pb-img-sep">or paste URL</div>
+      <div className="pb-img-url-row">
+        <input className="pb-input" value={urlInput} placeholder="https://..."
+          onChange={e => { setUrlInput(e.target.value); setUrlErr(""); }}
+          onKeyDown={e => e.key === "Enter" && (e.preventDefault(), handleUrl())} />
+        <button type="button" className="pb-icon-btn" style={{ border:"1px solid var(--border)", borderRadius:"var(--radius)", padding:"6px 10px" }}
+          onClick={handleUrl}><Plus size={13}/></button>
+      </div>
+      {urlErr && <p style={{ fontSize:11, color:"var(--red)", marginTop:4 }}>{urlErr}</p>}
+    </div>
+  );
+}
 
 /* ── Section Settings ── */
 function SectionSettings({ section, onChange }) {
@@ -172,7 +291,17 @@ function SectionSettings({ section, onChange }) {
                   Slide {i+1}
                   {slides.length > 1 && <button className="pb-icon-btn danger" onClick={() => set("slides", slides.filter((_,j)=>j!==i))}><X size={13}/></button>}
                 </div>
-                {[["img","Image URL"],["eyebrow","Eyebrow Text"],["title","Title"],["titleEm","Italic Highlight"],["subtitle","Subtitle"],["ctaLabel","CTA Label"],["ctaHref","CTA Link"]].map(([k,l]) => (
+                  {/* ── Image uploader ── */}
+                <div style={{ marginBottom:10 }}>
+                  <label className="pb-label" style={{ display:"block", marginBottom:6 }}>Slide Image</label>
+                  <ImageUploader
+                    value={slide.img || ""}
+                    onChange={val => updateSlide(i, "img", val)}
+                    aspect="16/7"
+                    placeholder="No slide image"
+                  />
+                </div>
+                {[["eyebrow","Eyebrow Text"],["title","Title"],["titleEm","Italic Highlight"],["subtitle","Subtitle"],["ctaLabel","CTA Label"],["ctaHref","CTA Link"]].map(([k,l]) => (
                   <div key={k} style={{ marginBottom:7 }}>
                     <label className="pb-label" style={{ display:"block", marginBottom:3 }}>{l}</label>
                     <input className="pb-input" value={slide[k]||""} onChange={e => updateSlide(i,k,e.target.value)} placeholder={k==="img"?"https://...":""} />
@@ -244,7 +373,17 @@ function SectionSettings({ section, onChange }) {
                   {cols.length>1 && <button className="pb-icon-btn danger" onClick={()=>set("collections",cols.filter((_,j)=>j!==i))}><X size={13}/></button>}
                 </div>
               </div>
-              {[["img","Image URL"],["title","Title"],["sub","Subtitle"],["href","Link"]].map(([k,l])=>(
+                {/* ── Image uploader ── */}
+              <div style={{ marginBottom:10 }}>
+                <label className="pb-label" style={{ display:"block", marginBottom:6 }}>Collection Image</label>
+                <ImageUploader
+                  value={col.img || ""}
+                  onChange={val => updateCol(i, "img", val)}
+                  aspect="16/7"
+                  placeholder="No image"
+                />
+              </div>
+              {[ ["title","Title"],["sub","Subtitle"],["href","Link"]].map(([k,l])=>(
                 <div key={k} style={{marginBottom:6}}>
                   <label className="pb-label" style={{display:"block",marginBottom:2}}>{l}</label>
                   <input className="pb-input" value={col[k]||""} onChange={e=>updateCol(i,k,e.target.value)} placeholder={k==="href"?"/listing":""}/>
@@ -260,15 +399,72 @@ function SectionSettings({ section, onChange }) {
     case "newsletter":
       return (<div className="pb-settings-grid full"><div className="pb-field"><label className="pb-label">Offer Text</label><input className="pb-input" value={s.offerText||""} onChange={e=>set("offerText",e.target.value)} placeholder="Get 5% off your first order"/></div></div>);
 
+    // case "banner_single":
+    //   return (
+    //     <div>
+
+    //       <div className="pb-settings-grid full"><div className="pb-field"><label className="pb-label">Banner Image URL</label><input className="pb-input" value={s.bannerImg||""} onChange={e=>set("bannerImg",e.target.value)}/></div></div>
+    //       <div className="pb-settings-grid">
+    //         <div className="pb-field"><label className="pb-label">Title</label><input className="pb-input" value={s.bannerTitle||""} onChange={e=>set("bannerTitle",e.target.value)}/></div>
+    //         <div className="pb-field"><label className="pb-label">CTA Text</label><input className="pb-input" value={s.bannerCta||""} onChange={e=>set("bannerCta",e.target.value)}/></div>
+    //       </div>
+    //       <div className="pb-settings-grid full"><div className="pb-field"><label className="pb-label">CTA Link</label><input className="pb-input" value={s.bannerHref||""} onChange={e=>set("bannerHref",e.target.value)}/></div></div>
+    //     </div>
+    //   );
+    /* ─────────────────── BANNER SINGLE ─────────────────── */
     case "banner_single":
       return (
         <div>
-          <div className="pb-settings-grid full"><div className="pb-field"><label className="pb-label">Banner Image URL</label><input className="pb-input" value={s.bannerImg||""} onChange={e=>set("bannerImg",e.target.value)}/></div></div>
-          <div className="pb-settings-grid">
-            <div className="pb-field"><label className="pb-label">Title</label><input className="pb-input" value={s.bannerTitle||""} onChange={e=>set("bannerTitle",e.target.value)}/></div>
-            <div className="pb-field"><label className="pb-label">CTA Text</label><input className="pb-input" value={s.bannerCta||""} onChange={e=>set("bannerCta",e.target.value)}/></div>
+          <p className="pb-section-settings-title">Banner Image</p>
+          <ImageUploader
+            value={s.bannerImg || ""}
+            onChange={val => set("bannerImg", val)}
+              aspect="16/7"
+            placeholder="No banner image"
+          />
+          <div className="pb-settings-grid" style={{marginTop:12}}>
+            <div className="pb-field"><label className="pb-label">Title</label>
+              <input className="pb-input" value={s.bannerTitle||""} onChange={e=>set("bannerTitle",e.target.value)}/></div>
+            <div className="pb-field"><label className="pb-label">CTA Text</label>
+              <input className="pb-input" value={s.bannerCta||""} onChange={e=>set("bannerCta",e.target.value)}/></div>
           </div>
-          <div className="pb-settings-grid full"><div className="pb-field"><label className="pb-label">CTA Link</label><input className="pb-input" value={s.bannerHref||""} onChange={e=>set("bannerHref",e.target.value)}/></div></div>
+          <div className="pb-settings-grid full">
+            <div className="pb-field"><label className="pb-label">CTA Link</label>
+              <input className="pb-input" value={s.bannerHref||""} onChange={e=>set("bannerHref",e.target.value)}/></div>
+          </div>
+        </div>
+      );
+
+         case "banner_split":
+      return (
+        <div>
+          <p className="pb-section-settings-title">Left Panel</p>
+          <ImageUploader
+            value={s.leftImg || ""}
+            onChange={val => set("leftImg", val)}
+              aspect="16/7"
+            placeholder="Left image"
+          />
+          <div className="pb-settings-grid" style={{marginTop:10}}>
+            <div className="pb-field"><label className="pb-label">Title</label>
+              <input className="pb-input" value={s.leftTitle||""} onChange={e=>set("leftTitle",e.target.value)}/></div>
+            <div className="pb-field"><label className="pb-label">Link</label>
+              <input className="pb-input" value={s.leftHref||""} onChange={e=>set("leftHref",e.target.value)} placeholder="/listing"/></div>
+          </div>
+ 
+          <p className="pb-section-settings-title" style={{marginTop:14}}>Right Panel</p>
+          <ImageUploader
+            value={s.rightImg || ""}
+            onChange={val => set("rightImg", val)}
+            aspect="16/7"
+            placeholder="Right image"
+          />
+          <div className="pb-settings-grid" style={{marginTop:10}}>
+            <div className="pb-field"><label className="pb-label">Title</label>
+              <input className="pb-input" value={s.rightTitle||""} onChange={e=>set("rightTitle",e.target.value)}/></div>
+            <div className="pb-field"><label className="pb-label">Link</label>
+              <input className="pb-input" value={s.rightHref||""} onChange={e=>set("rightHref",e.target.value)} placeholder="/listing"/></div>
+          </div>
         </div>
       );
 

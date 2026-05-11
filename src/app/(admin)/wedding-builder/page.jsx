@@ -21,6 +21,7 @@ const METALS     = ["Yellow Gold","White Gold","Rose Gold"];
 const BADGES     = ["Bestseller","New","Limited","Exclusive","Top Rated"];
 const LIMIT = 20;
 const BASE       = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+import { ImageUploader as ImageUpload } from "../../../components/common/ImageUploader";
 
 /* ══════════════════════════════════════════
    STYLES — matched to Page Builder
@@ -378,33 +379,77 @@ function ProductForm({ form, setForm, err }) {
   return (
     <div>
       {err && (
-        <div style={{ background:"var(--red-bg)", color:"var(--red)", padding:"10px 14px", borderRadius:"var(--radius)", marginBottom:14, fontSize:12.5, display:"flex", gap:8, alignItems:"center" }}>
+        <div
+          style={{
+            background: "var(--red-bg)",
+            color: "var(--red)",
+            padding: "10px 14px",
+            borderRadius: "var(--radius)",
+            marginBottom: 14,
+            fontSize: 12.5,
+            display: "flex",
+            gap: 8,
+            alignItems: "center",
+          }}
+        >
           <AlertCircle size={14} /> {err}
         </div>
       )}
 
       <p className="wa-form-sep">Basic Information</p>
       <div className="wa-form-grid">
-        <div className="wa-field"><label className="wa-label">Product Name *</label>
-          <input className="wa-input" value={form.name} onChange={sf("name")} placeholder="Rani Haar Bridal Set" /></div>
-        <div className="wa-field"><label className="wa-label">SKU</label>
-          <input className="wa-input" value={form.sku} onChange={sf("sku")} placeholder="MAN-NEC-001" /></div>
+        <div className="wa-field">
+          <label className="wa-label">Product Name *</label>
+          <input
+            className="wa-input"
+            value={form.name}
+            onChange={sf("name")}
+            placeholder="Rani Haar Bridal Set"
+          />
+        </div>
+        <div className="wa-field">
+          <label className="wa-label">SKU</label>
+          <input
+            className="wa-input"
+            value={form.sku}
+            onChange={sf("sku")}
+            placeholder="MAN-NEC-001"
+          />
+        </div>
       </div>
       <div className="wa-form-grid full">
-        <div className="wa-field"><label className="wa-label">Description</label>
-          <textarea className="wa-textarea" value={form.description} onChange={sf("description")} rows={3} placeholder="A statement bridal set crafted in 22KT gold…" /></div>
+        <div className="wa-field">
+          <label className="wa-label">Description</label>
+          <textarea
+            className="wa-textarea"
+            value={form.description}
+            onChange={sf("description")}
+            rows={3}
+            placeholder="A statement bridal set crafted in 22KT gold…"
+          />
+        </div>
       </div>
       <div className="wa-form-grid full">
-        <div className="wa-field"><label className="wa-label">Pieces List</label>
-          <input className="wa-input" value={form.piecesList} onChange={sf("piecesList")} placeholder="Necklace · Earrings · Maang Tikka · Bangles" /></div>
+        <div className="wa-field">
+          <label className="wa-label">Pieces List</label>
+          <input
+            className="wa-input"
+            value={form.piecesList}
+            onChange={sf("piecesList")}
+            placeholder="Necklace · Earrings · Maang Tikka · Bangles"
+          />
+        </div>
       </div>
 
       <p className="wa-form-sep">Occasions</p>
       <div className="wa-occ-pills">
-        {OCCASIONS.map(occ => (
-          <button key={occ} type="button"
+        {OCCASIONS.map((occ) => (
+          <button
+            key={occ}
+            type="button"
             className={`wa-occ-pill-btn${form.occasion?.includes(occ) ? " selected" : ""}`}
-            onClick={() => toggleOcc(occ)}>
+            onClick={() => toggleOcc(occ)}
+          >
             {OCCASION_LABELS[occ]}
           </button>
         ))}
@@ -412,36 +457,107 @@ function ProductForm({ form, setForm, err }) {
 
       <p className="wa-form-sep">Category & Metal</p>
       <div className="wa-form-grid three">
-        <div className="wa-field"><label className="wa-label">Category *</label>
-          <select className="wa-select" value={form.category} onChange={sf("category")}>
-            {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-          </select></div>
-        <div className="wa-field"><label className="wa-label">Metal Type</label>
-          <select className="wa-select" value={form["metal.type"]} onChange={sf("metal.type")}>
-            {METALS.map(m => <option key={m}>{m}</option>)}
-          </select></div>
-        <div className="wa-field"><label className="wa-label">Purity</label>
-          <select className="wa-select" value={form["metal.purity"]} onChange={sf("metal.purity")}>
-            {PURITIES.map(p => <option key={p}>{p}</option>)}
-          </select></div>
+        <div className="wa-field">
+          <label className="wa-label">Category *</label>
+          <select
+            className="wa-select"
+            value={form.category}
+            onChange={sf("category")}
+          >
+            {CATEGORIES.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+        <div className="wa-field">
+          <label className="wa-label">Metal Type</label>
+          <select
+            className="wa-select"
+            value={form["metal.type"]}
+            onChange={sf("metal.type")}
+          >
+            {METALS.map((m) => (
+              <option key={m}>{m}</option>
+            ))}
+          </select>
+        </div>
+        <div className="wa-field">
+          <label className="wa-label">Purity</label>
+          <select
+            className="wa-select"
+            value={form["metal.purity"]}
+            onChange={sf("metal.purity")}
+          >
+            {PURITIES.map((p) => (
+              <option key={p}>{p}</option>
+            ))}
+          </select>
+        </div>
       </div>
       <div className="wa-form-grid three">
-        <div className="wa-field"><label className="wa-label">Metal Weight (g)</label>
-          <input className="wa-input" type="number" value={form["metal.weight"]} onChange={sf("metal.weight")} placeholder="74.09" /></div>
-        <div className="wa-field"><label className="wa-label">Stone Type</label>
-          <input className="wa-input" value={form["stones.type"]} onChange={sf("stones.type")} placeholder="Diamond / Emerald" /></div>
-        <div className="wa-field"><label className="wa-label">Stone Weight (ct)</label>
-          <input className="wa-input" type="number" value={form["stones.weight"]} onChange={sf("stones.weight")} placeholder="0.45" /></div>
+        <div className="wa-field">
+          <label className="wa-label">Metal Weight (g)</label>
+          <input
+            className="wa-input"
+            type="number"
+            value={form["metal.weight"]}
+            onChange={sf("metal.weight")}
+            placeholder="74.09"
+          />
+        </div>
+        <div className="wa-field">
+          <label className="wa-label">Stone Type</label>
+          <input
+            className="wa-input"
+            value={form["stones.type"]}
+            onChange={sf("stones.type")}
+            placeholder="Diamond / Emerald"
+          />
+        </div>
+        <div className="wa-field">
+          <label className="wa-label">Stone Weight (ct)</label>
+          <input
+            className="wa-input"
+            type="number"
+            value={form["stones.weight"]}
+            onChange={sf("stones.weight")}
+            placeholder="0.45"
+          />
+        </div>
       </div>
 
       <p className="wa-form-sep">Pricing</p>
       <div className="wa-form-grid three">
-        <div className="wa-field"><label className="wa-label">Current Price (₹) *</label>
-          <input className="wa-input" type="number" value={form["price.current"]} onChange={sf("price.current")} placeholder="524000" /></div>
-        <div className="wa-field"><label className="wa-label">Original Price (₹)</label>
-          <input className="wa-input" type="number" value={form["price.original"]} onChange={sf("price.original")} placeholder="578000" /></div>
-        <div className="wa-field"><label className="wa-label">Making Charges (₹)</label>
-          <input className="wa-input" type="number" value={form.makingCharges} onChange={sf("makingCharges")} placeholder="14200" /></div>
+        <div className="wa-field">
+          <label className="wa-label">Current Price (₹) *</label>
+          <input
+            className="wa-input"
+            type="number"
+            value={form["price.current"]}
+            onChange={sf("price.current")}
+            placeholder="524000"
+          />
+        </div>
+        <div className="wa-field">
+          <label className="wa-label">Original Price (₹)</label>
+          <input
+            className="wa-input"
+            type="number"
+            value={form["price.original"]}
+            onChange={sf("price.original")}
+            placeholder="578000"
+          />
+        </div>
+        <div className="wa-field">
+          <label className="wa-label">Making Charges (₹)</label>
+          <input
+            className="wa-input"
+            type="number"
+            value={form.makingCharges}
+            onChange={sf("makingCharges")}
+            placeholder="14200"
+          />
+        </div>
       </div>
 
       {/* <p className="wa-form-sep"><Image size={13} /> Images</p>
@@ -450,58 +566,143 @@ function ProductForm({ form, setForm, err }) {
         <input className="wa-input" value={form.thumbnail} onChange={sf("thumbnail")} placeholder="https://..." />
       </div> */}
 
-        {/* Images */}
-              <div className="form-field" style={{ marginBottom:16 }}>
-                <label className="form-label" style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8 }}>
-                  <Image size={12} /> Product Images
-                </label>
-                <ImageUploader
-                  thumbnail={form.thumbnail}
-                  images={form.images || []}
-                  onThumbChange={url => setForm(p => ({ ...p, thumbnail: url }))}
-                  onImagesChange={imgs => setForm(p => ({ ...p, images: imgs }))}
-                />
-              </div>
+      {/* Images */}
+      <div className="form-field" style={{ marginBottom: 16 }}>
+        <label
+          className="form-label"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            marginBottom: 8,
+          }}
+        >
+          <Image size={12} /> Product Images
+        </label>
+        <ImageUploader
+          thumbnail={form.thumbnail}
+          images={form.images || []}
+          onThumbChange={(url) => setForm((p) => ({ ...p, thumbnail: url }))}
+          onImagesChange={(imgs) => setForm((p) => ({ ...p, images: imgs }))}
+        />
+      </div>
       <div className="wa-field">
         <label className="wa-label">Gallery Images</label>
         <div className="wa-img-list">
           {(form.images || []).map((img, i) => (
-            <div key={i} style={{ position:"relative" }}>
+            <div key={i} style={{ position: "relative" }}>
               <img src={img} alt="" className="wa-img-thumb" />
-              <button type="button" onClick={() => removeImage(i)}
-                style={{ position:"absolute", top:-5, right:-5, width:16, height:16, border:"none", borderRadius:"50%", background:"var(--red)", color:"#fff", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontSize:9 }}>
+              <button
+                type="button"
+                onClick={() => removeImage(i)}
+                style={{
+                  position: "absolute",
+                  top: -5,
+                  right: -5,
+                  width: 16,
+                  height: 16,
+                  border: "none",
+                  borderRadius: "50%",
+                  background: "var(--red)",
+                  color: "#fff",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 9,
+                }}
+              >
                 ✕
               </button>
             </div>
           ))}
         </div>
         <div className="wa-img-add-row">
-          <input className="wa-input" value={imgUrl} onChange={e => setImgUrl(e.target.value)}
+          <input
+            className="wa-input"
+            value={imgUrl}
+            onChange={(e) => setImgUrl(e.target.value)}
             placeholder="Paste image URL and click Add"
-            onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addImage())} />
-          <button type="button" className="btn btn-outline btn-sm" onClick={addImage}><Plus size={13} /></button>
+            onKeyDown={(e) =>
+              e.key === "Enter" && (e.preventDefault(), addImage())
+            }
+          />
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={addImage}
+          >
+            <Plus size={13} />
+          </button>
         </div>
       </div>
 
       <p className="wa-form-sep">Inventory & Display</p>
       <div className="wa-form-grid three">
-        <div className="wa-field"><label className="wa-label">Stock Qty</label>
-          <input className="wa-input" type="number" value={form["inventory.quantity"]} onChange={sf("inventory.quantity")} /></div>
-        <div className="wa-field"><label className="wa-label">Badge</label>
-          <select className="wa-select" value={form.badge || ""} onChange={sf("badge")}>
+        <div className="wa-field">
+          <label className="wa-label">Stock Qty</label>
+          <input
+            className="wa-input"
+            type="number"
+            value={form["inventory.quantity"]}
+            onChange={sf("inventory.quantity")}
+          />
+        </div>
+        <div className="wa-field">
+          <label className="wa-label">Badge</label>
+          <select
+            className="wa-select"
+            value={form.badge || ""}
+            onChange={sf("badge")}
+          >
             <option value="">No Badge</option>
-            {BADGES.map(b => <option key={b}>{b}</option>)}
-          </select></div>
-        <div className="wa-field"><label className="wa-label">Pieces in Set</label>
-          <input className="wa-input" type="number" value={form.pieces} onChange={sf("pieces")} min={1} /></div>
+            {BADGES.map((b) => (
+              <option key={b}>{b}</option>
+            ))}
+          </select>
+        </div>
+        <div className="wa-field">
+          <label className="wa-label">Pieces in Set</label>
+          <input
+            className="wa-input"
+            type="number"
+            value={form.pieces}
+            onChange={sf("pieces")}
+            min={1}
+          />
+        </div>
       </div>
-      <div style={{ display:"flex", gap:20, flexWrap:"wrap", marginTop:8 }}>
-        <Toggle value={form.isWedding}            onChange={sb("isWedding")}            label="Bridal / Wedding" />
-        <Toggle value={form.isBestSeller}         onChange={sb("isBestSeller")}         label="Bestseller" />
-        <Toggle value={form.isNewArrival}         onChange={sb("isNewArrival")}         label="New Arrival" />
-        <Toggle value={form.isFeatured}           onChange={sb("isFeatured")}           label="Featured" />
-        <Toggle value={form["inventory.inStock"]} onChange={sb("inventory.inStock")}    label="In Stock" />
-        <Toggle value={form.isActive}             onChange={sb("isActive")}             label="Active / Visible" />
+      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginTop: 8 }}>
+        <Toggle
+          value={form.isWedding}
+          onChange={sb("isWedding")}
+          label="Bridal / Wedding"
+        />
+        <Toggle
+          value={form.isBestSeller}
+          onChange={sb("isBestSeller")}
+          label="Bestseller"
+        />
+        <Toggle
+          value={form.isNewArrival}
+          onChange={sb("isNewArrival")}
+          label="New Arrival"
+        />
+        <Toggle
+          value={form.isFeatured}
+          onChange={sb("isFeatured")}
+          label="Featured"
+        />
+        <Toggle
+          value={form["inventory.inStock"]}
+          onChange={sb("inventory.inStock")}
+          label="In Stock"
+        />
+        <Toggle
+          value={form.isActive}
+          onChange={sb("isActive")}
+          label="Active / Visible"
+        />
       </div>
     </div>
   );
@@ -881,10 +1082,20 @@ export default function WeddingAdminPage() {
                       <button className="wa-cfg-row-del" onClick={() => delArr("heroSlides", i)} title="Remove slide">
                         <Trash2 size={14} />
                       </button>
-                      <div className="wa-form-grid full" style={{ marginBottom:12 }}>
+                      {/* <div className="wa-form-grid full" style={{ marginBottom:12 }}>
                         <div className="wa-field"><label className="wa-label">Image URL</label>
-                          <input className="wa-input" value={s.img || ""} onChange={e => updateArr("heroSlides", i, "img", e.target.value)} placeholder="https://..." /></div>
-                      </div>
+                          <input className="wa-input" value={s.img || ""} onChange={e => updateArr(" ", i, "img", e.target.value)} placeholder="https://..." /></div>
+                      </div> */}
+                          {/* ── Image uploader ── */}
+                <div style={{ marginBottom:10 }}>
+                  <label className="pb-label" style={{ display:"block", marginBottom:6 }}>Slide Image</label>
+                  <ImageUpload
+                    value={s.img || ""}
+                    onChange={val => updateSlide(i, "img", val)}
+                    aspect="16/7"
+                    placeholder="No slide image"
+                  />
+                </div>
                       <div className="wa-form-grid three">
                         <div className="wa-field"><label className="wa-label">Eyebrow</label>
                           <input className="wa-input" value={s.eyebrow || ""} onChange={e => updateArr("heroSlides", i, "eyebrow", e.target.value)} placeholder="New Collection" /></div>

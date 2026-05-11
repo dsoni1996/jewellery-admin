@@ -14,6 +14,11 @@ const mockReviews = [
 
 const starColor = r => r >= 4 ? "var(--green)" : r === 3 ? "var(--amber)" : "var(--red)";
 
+const S = `
+.dash-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+@media(max-width:1100px){ .dash-stats { grid-template-columns:repeat(2,1fr); } }
+`;
+
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState(mockReviews);
   const [filter, setFilter]  = useState("all");
@@ -32,7 +37,8 @@ export default function ReviewsPage() {
 
   return (
     <>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:24 }}>
+      <style>{S}</style>
+      <div  className="dash-stats">
         <StatCard label="Total Reviews"    value={reviews.length}                     icon={Star} color="var(--gold)" />
         <StatCard label="Avg. Rating"      value={avgRating + " ★"}  sub="out of 5"    icon={Star} color="var(--amber)" colorBg="var(--amber-bg)" />
         <StatCard label="Approved"         value={reviews.filter(r => r.approved).length}   icon={Check} color="var(--green)" colorBg="var(--green-bg)" />

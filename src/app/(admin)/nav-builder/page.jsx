@@ -2,8 +2,9 @@
 import { useState, useEffect } from "react";
 import {
   Save, RotateCcw, Plus, Trash2, Eye, EyeOff,
-  GripVertical, ChevronDown, ChevronUp, Loader2,
-  Check, AlertCircle, ExternalLink, Image, Link as LinkIcon,
+  GripVertical, Loader2, Check, AlertCircle,
+  ExternalLink, Link as LinkIcon, ChevronDown, ChevronUp,
+  Image as ImageIcon, Columns,
 } from "lucide-react";
 import { api } from "../../../lib/api";
 
@@ -19,24 +20,24 @@ const S = `
 
 /* Section card */
 .nb-section { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
-.nb-section-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); cursor:pointer; }
+.nb-section-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); }
 .nb-section-title { font-family:var(--font-serif); font-size:18px; color:var(--dark); }
 .nb-section-title em { font-style:italic; color:var(--gold); }
 .nb-section-body { padding:20px; }
 
 /* Nav item row */
 .ni-row { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px; transition:box-shadow .15s; }
-.ni-row.dragging { opacity:.5; box-shadow:var(--shadow-md); }
 .ni-drag { color:var(--text3); cursor:grab; flex-shrink:0; }
 .ni-drag:active { cursor:grabbing; }
 .ni-name { font-size:13px; font-weight:500; color:var(--dark); flex:1; min-width:0; }
 .ni-href { font-size:11.5px; color:var(--text3); font-family:monospace; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .ni-actions { display:flex; gap:6px; flex-shrink:0; }
-.ni-btn { background:none; border:1px solid var(--border); border-radius:var(--radius); width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text2); transition:all .15s; }
+.ni-btn { background:none; border:1px solid var(--border); border-radius:var(--radius); width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text2); transition:all .15s; flex-shrink:0; }
 .ni-btn:hover { border-color:var(--gold); color:var(--gold); }
-.ni-btn.vis-on { color:var(--green); }
+.ni-btn.vis-on { color:var(--green); border-color:var(--green); }
+.ni-btn.active { color:var(--blue); border-color:var(--blue); background:var(--blue-bg); }
 .ni-btn.danger:hover { border-color:var(--red); color:var(--red); }
-.ni-badge { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; padding:2px 7px; border-radius:2px; font-weight:500; }
+.ni-badge { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; padding:2px 7px; border-radius:2px; font-weight:500; white-space:nowrap; }
 .ni-badge.mega { background:var(--blue-bg); color:var(--blue); }
 .ni-badge.hidden { background:var(--border); color:var(--text3); }
 
@@ -44,9 +45,16 @@ const S = `
 .ni-edit-form { padding:12px 14px; background:var(--white); border:1px solid var(--border); border-radius:var(--radius); margin-top:-4px; margin-bottom:8px; }
 .ni-edit-grid { display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:end; }
 .ni-edit-label { font-size:9.5px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); margin-bottom:4px; display:block; }
-.ni-edit-input { border:1px solid var(--border); padding:8px 10px; font-size:13px; color:var(--dark); font-family:var(--font-sans); outline:none; border-radius:var(--radius); background:var(--white); width:100%; }
+.ni-edit-input { border:1px solid var(--border); padding:8px 10px; font-size:13px; color:var(--dark); font-family:var(--font-sans); outline:none; border-radius:var(--radius); background:var(--white); width:100%; box-sizing:border-box; }
 .ni-edit-input:focus { border-color:var(--gold); }
 .ni-edit-actions { display:flex; gap:8px; margin-top:10px; }
+
+/* Mega panel (inside nav item) */
+.mega-panel { margin-top:-4px; margin-bottom:8px; border:1px solid var(--blue); border-radius:var(--radius); overflow:hidden; }
+.mega-panel-tabs { display:flex; border-bottom:1px solid var(--border); background:var(--bg); }
+.mega-tab { flex:1; padding:10px; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); background:none; border:none; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:6px; }
+.mega-tab.active { color:var(--blue); border-bottom:2px solid var(--blue); background:var(--white); }
+.mega-panel-body { padding:16px; background:var(--white); }
 
 /* Mega col */
 .mc-wrap { border:1px solid var(--border); border-radius:var(--radius); margin-bottom:10px; overflow:hidden; }
@@ -62,7 +70,7 @@ const S = `
 /* Image row */
 .img-row { display:grid; grid-template-columns:80px 1fr 1fr auto; gap:10px; align-items:center; padding:10px 14px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px; }
 .img-preview { width:80px; height:50px; object-fit:cover; border-radius:var(--radius); background:var(--border); display:block; }
-.img-input { border:1px solid var(--border); padding:6px 10px; font-size:12px; color:var(--dark); font-family:var(--font-sans); outline:none; border-radius:var(--radius); background:var(--white); width:100%; }
+.img-input { border:1px solid var(--border); padding:6px 10px; font-size:12px; color:var(--dark); font-family:var(--font-sans); outline:none; border-radius:var(--radius); background:var(--white); width:100%; box-sizing:border-box; }
 .img-input:focus { border-color:var(--gold); }
 
 /* Hints */
@@ -82,29 +90,140 @@ const S = `
 
 /* Save bar */
 .nb-save-bar { position:fixed; bottom:0; left:var(--sidebar-w); right:0; background:var(--white); border-top:1px solid var(--border); padding:14px 28px; display:flex; align-items:center; justify-content:space-between; z-index:50; box-shadow:0 -4px 20px rgba(44,26,14,.08); }
+
+/* Empty state */
+.nb-empty { text-align:center; padding:28px 16px; color:var(--text3); font-size:13px; }
 `;
 
-/* ── small helpers ── */
 const uid = () => Math.random().toString(36).slice(2, 9);
 
-export default function NavBuilderPage() {
-  const [navData, setNavData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saving,  setSaving]  = useState(false);
-  const [dirty,   setDirty]   = useState(false);
-  const [toast,   setToast]   = useState(null);
+/* ─────────────────────────────────────────────
+   MegaPanel — cols + images for ONE nav item
+───────────────────────────────────────────── */
+function MegaPanel({ item, navId, onUpdateCol, onUpdateItem, onAddItem, onRemoveItem, onUpdateImg, onAddImg, onRemoveImg, mark }) {
+  const [tab, setTab] = useState("cols"); // "cols" | "imgs"
 
-  /* open/close states */
-  const [editingNavId, setEditingNavId] = useState(null);
+  return (
+    <div className="mega-panel">
+      <div className="mega-panel-tabs">
+        <button className={`mega-tab${tab === "cols" ? " active" : ""}`} onClick={() => setTab("cols")}>
+          <Columns size={12} /> Columns ({item.megaCols?.length || 0})
+        </button>
+        <button className={`mega-tab${tab === "imgs" ? " active" : ""}`} onClick={() => setTab("imgs")}>
+          <ImageIcon size={12} /> Images ({item.megaImgs?.length || 0})
+        </button>
+      </div>
+
+      <div className="mega-panel-body">
+        {tab === "cols" && (
+          <>
+            {(item.megaCols || []).length === 0 && (
+              <p className="nb-empty">No columns yet. Add one below.</p>
+            )}
+            {(item.megaCols || []).map((col) => (
+              <div key={col._id} className="mc-wrap">
+                <div className="mc-head">
+                  <GripVertical size={13} style={{ color: "var(--text3)" }} />
+                  <input
+                    className="mc-title-input"
+                    value={col.title || ""}
+                    placeholder="Column heading (leave blank for none)"
+                    onChange={e => onUpdateCol(navId, col._id, "title", e.target.value)}
+                  />
+                  <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text2)", cursor: "pointer", whiteSpace: "nowrap" }}>
+                    <input
+                      type="checkbox"
+                      checked={!!col.highlightLast}
+                      onChange={e => onUpdateCol(navId, col._id, "highlightLast", e.target.checked)}
+                      style={{ accentColor: "var(--gold)" }}
+                    />
+                    Highlight last
+                  </label>
+                  <button className="ni-btn danger" onClick={() => onUpdateCol(navId, col._id, "__DELETE__", null)} title="Delete column">
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+                <div className="mc-items">
+                  {col.items.map((it, si) => (
+                    <div key={si} className="mc-item-row">
+                      <input className="mc-item-input" value={it.label || ""}
+                        onChange={e => onUpdateItem(navId, col._id, si, "label", e.target.value)}
+                        placeholder="Label" />
+                      <input className="mc-item-input" value={it.href || ""}
+                        onChange={e => onUpdateItem(navId, col._id, si, "href", e.target.value)}
+                        placeholder="/listing?category=Ring" />
+                      <button className="ni-btn danger" onClick={() => onRemoveItem(navId, col._id, si)}>
+                        <Trash2 size={11} />
+                      </button>
+                    </div>
+                  ))}
+                  <button className="btn btn-outline btn-sm" style={{ marginTop: 8 }} onClick={() => onAddItem(navId, col._id)}>
+                    <Plus size={12} /> Add Item
+                  </button>
+                </div>
+              </div>
+            ))}
+            <button className="btn btn-outline btn-sm" onClick={() => onUpdateCol(navId, null, "__ADD__", null)}>
+              <Plus size={12} /> Add Column
+            </button>
+          </>
+        )}
+
+        {tab === "imgs" && (
+          <>
+            {(item.megaImgs || []).length === 0 && (
+              <p className="nb-empty">No images yet. Add one below.</p>
+            )}
+            {(item.megaImgs || []).map((img) => (
+              <div key={img._id} className="img-row">
+                <img src={img.src || "https://picsum.photos/80/50"} alt={img.alt} className="img-preview" />
+                <div>
+                  <label style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", color: "var(--text3)", display: "block", marginBottom: 3 }}>Image URL</label>
+                  <input className="img-input" value={img.src}
+                    onChange={e => onUpdateImg(navId, img._id, "src", e.target.value)}
+                    placeholder="https://..." />
+                </div>
+                <div>
+                  <label style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", color: "var(--text3)", display: "block", marginBottom: 3 }}>Alt & Link</label>
+                  <input className="img-input" value={img.alt}
+                    onChange={e => onUpdateImg(navId, img._id, "alt", e.target.value)}
+                    placeholder="Label text" style={{ marginBottom: 4 }} />
+                  <input className="img-input" value={img.href}
+                    onChange={e => onUpdateImg(navId, img._id, "href", e.target.value)}
+                    placeholder="/listing" />
+                </div>
+                <button className="ni-btn danger" onClick={() => onRemoveImg(navId, img._id)}>
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            ))}
+            <button className="btn btn-outline btn-sm" onClick={() => onAddImg(navId)}>
+              <Plus size={12} /> Add Image
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Main Page
+───────────────────────────────────────────── */
+export default function NavBuilderPage() {
+  const [navData,      setNavData]      = useState(null);
+  const [loading,      setLoading]      = useState(true);
+  const [saving,       setSaving]       = useState(false);
+  const [dirty,        setDirty]        = useState(false);
+  const [toast,        setToast]        = useState(null);
+  const [editingNavId, setEditingNavId] = useState(null);   // inline label/url edit
+  const [megaNavId,    setMegaNavId]    = useState(null);   // which nav item's mega panel is open
   const [newHint,      setNewHint]      = useState("");
 
-  /* Load */
+  /* ── Load ── */
   useEffect(() => {
-    api.homeSection && (async () => {})(); // keep admin api alive
     (async () => {
       try {
-        const { nav } = await api.homepage.getConfig().catch(() => ({})); // reuse admin token
-        // Actually fetch nav config
         const res = await fetch(
           (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api") + "/nav/admin",
           { headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` } }
@@ -121,7 +240,6 @@ export default function NavBuilderPage() {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
-
   const mark = () => setDirty(true);
 
   /* ── Save ── */
@@ -132,10 +250,7 @@ export default function NavBuilderPage() {
         (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api") + "/nav",
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
-          },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("admin_token")}` },
           body: JSON.stringify(navData),
         }
       );
@@ -158,6 +273,7 @@ export default function NavBuilderPage() {
     const data = await res.json();
     setNavData(data.nav);
     setDirty(false);
+    setMegaNavId(null);
     showToast("Reset to defaults ✓");
   };
 
@@ -168,6 +284,7 @@ export default function NavBuilderPage() {
   };
   const removeNavItem = (id) => {
     setNavData(p => ({ ...p, navItems: p.navItems.filter(i => i._id !== id) }));
+    if (megaNavId === id) setMegaNavId(null);
     mark();
   };
   const updateNavItem = (id, key, val) => {
@@ -175,54 +292,108 @@ export default function NavBuilderPage() {
     mark();
   };
   const addNavItem = () => {
-    setNavData(p => ({ ...p, navItems: [...(p.navItems || []), { _id: uid(), name: "New Link", href: "/", visible: true, hasMegaMenu: false, order: (p.navItems?.length || 0) }] }));
+    setNavData(p => ({
+      ...p,
+      navItems: [...(p.navItems || []), {
+        _id: uid(), name: "New Link", href: "/", visible: true,
+        hasMegaMenu: false, order: p.navItems?.length || 0,
+        megaCols: [], megaImgs: [],
+      }],
+    }));
     mark();
   };
 
   /* ── Mega col helpers ── */
-  const updateMegaColTitle = (id, val) => {
-    setNavData(p => ({ ...p, megaCols: p.megaCols.map(c => c._id === id ? { ...c, title: val } : c) }));
-    mark();
-  };
-  const updateMegaItem = (colId, si, key, val) => {
+  const handleMegaCol = (navId, colId, key, val) => {
     setNavData(p => ({
       ...p,
-      megaCols: p.megaCols.map(c => c._id === colId
-        ? { ...c, items: c.items.map((it, i) => i === si ? { ...it, [key]: val } : it) }
-        : c
-      ),
+      navItems: p.navItems.map(n => {
+        if (n._id !== navId) return n;
+        if (key === "__ADD__") {
+          return { ...n, megaCols: [...(n.megaCols || []), { _id: uid(), title: "", order: n.megaCols?.length || 0, highlightLast: false, items: [] }] };
+        }
+        if (key === "__DELETE__") {
+          return { ...n, megaCols: n.megaCols.filter(c => c._id !== colId) };
+        }
+        return { ...n, megaCols: n.megaCols.map(c => c._id === colId ? { ...c, [key]: val } : c) };
+      }),
     }));
     mark();
   };
-  const addMegaItem = (colId) => {
+
+  const updateMegaItem = (navId, colId, si, key, val) => {
     setNavData(p => ({
       ...p,
-      megaCols: p.megaCols.map(c => c._id === colId
-        ? { ...c, items: [...c.items, { label: "New Item", href: "/listing", visible: true }] }
-        : c
-      ),
+      navItems: p.navItems.map(n => n._id !== navId ? n : {
+        ...n,
+        megaCols: n.megaCols.map(c => c._id !== colId ? c : {
+          ...c,
+          items: c.items.map((it, i) => i === si ? { ...it, [key]: val } : it),
+        }),
+      }),
     }));
     mark();
   };
-  const removeMegaItem = (colId, si) => {
+
+  const addMegaItem = (navId, colId) => {
     setNavData(p => ({
       ...p,
-      megaCols: p.megaCols.map(c => c._id === colId ? { ...c, items: c.items.filter((_, i) => i !== si) } : c),
+      navItems: p.navItems.map(n => n._id !== navId ? n : {
+        ...n,
+        megaCols: n.megaCols.map(c => c._id !== colId ? c : {
+          ...c,
+          items: [...c.items, { label: "New Item", href: "/listing", visible: true }],
+        }),
+      }),
+    }));
+    mark();
+  };
+
+  const removeMegaItem = (navId, colId, si) => {
+    setNavData(p => ({
+      ...p,
+      navItems: p.navItems.map(n => n._id !== navId ? n : {
+        ...n,
+        megaCols: n.megaCols.map(c => c._id !== colId ? c : {
+          ...c,
+          items: c.items.filter((_, i) => i !== si),
+        }),
+      }),
     }));
     mark();
   };
 
   /* ── Image helpers ── */
-  const updateImg = (id, key, val) => {
-    setNavData(p => ({ ...p, megaImgs: p.megaImgs.map(i => i._id === id ? { ...i, [key]: val } : i) }));
+  const updateImg = (navId, imgId, key, val) => {
+    setNavData(p => ({
+      ...p,
+      navItems: p.navItems.map(n => n._id !== navId ? n : {
+        ...n,
+        megaImgs: n.megaImgs.map(i => i._id === imgId ? { ...i, [key]: val } : i),
+      }),
+    }));
     mark();
   };
-  const addImg = () => {
-    setNavData(p => ({ ...p, megaImgs: [...(p.megaImgs || []), { _id: uid(), src: "", alt: "", href: "/listing", visible: true, order: (p.megaImgs?.length || 0) }] }));
+
+  const addImg = (navId) => {
+    setNavData(p => ({
+      ...p,
+      navItems: p.navItems.map(n => n._id !== navId ? n : {
+        ...n,
+        megaImgs: [...(n.megaImgs || []), { _id: uid(), src: "", alt: "", href: "/listing", visible: true, order: n.megaImgs?.length || 0 }],
+      }),
+    }));
     mark();
   };
-  const removeImg = (id) => {
-    setNavData(p => ({ ...p, megaImgs: p.megaImgs.filter(i => i._id !== id) }));
+
+  const removeImg = (navId, imgId) => {
+    setNavData(p => ({
+      ...p,
+      navItems: p.navItems.map(n => n._id !== navId ? n : {
+        ...n,
+        megaImgs: n.megaImgs.filter(i => i._id !== imgId),
+      }),
+    }));
     mark();
   };
 
@@ -238,16 +409,17 @@ export default function NavBuilderPage() {
     mark();
   };
 
+  /* ── Loading / Error states ── */
   if (loading) return (
-    <div style={{ display:"flex", alignItems:"center", justifyContent:"center", minHeight:300, gap:10, color:"var(--text3)" }}>
-      <Loader2 size={22} style={{ animation:"spin .8s linear infinite" }} />
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 300, gap: 10, color: "var(--text3)" }}>
+      <Loader2 size={22} style={{ animation: "spin .8s linear infinite" }} />
       Loading nav config…
     </div>
   );
 
   if (!navData) return (
-    <div style={{ textAlign:"center", padding:60, color:"var(--text3)" }}>
-      <AlertCircle size={28} style={{ margin:"0 auto 12px" }} />
+    <div style={{ textAlign: "center", padding: 60, color: "var(--text3)" }}>
+      <AlertCircle size={28} style={{ margin: "0 auto 12px" }} />
       <p>Could not load navigation config.</p>
     </div>
   );
@@ -255,7 +427,12 @@ export default function NavBuilderPage() {
   return (
     <>
       <style>{S}</style>
-      {toast && <div className={`nb-toast ${toast.type}`}>{toast.type === "success" ? <Check size={14} /> : <AlertCircle size={14} />} {toast.msg}</div>}
+      {toast && (
+        <div className={`nb-toast ${toast.type}`}>
+          {toast.type === "success" ? <Check size={14} /> : <AlertCircle size={14} />}
+          {toast.msg}
+        </div>
+      )}
 
       <div className="nb-root">
         {/* Toolbar */}
@@ -267,37 +444,43 @@ export default function NavBuilderPage() {
             </div>
           </div>
           <a href="http://localhost:3000" target="_blank" rel="noopener"
-            style={{ display:"flex", alignItems:"center", gap:6, fontSize:11, letterSpacing:1.5, textTransform:"uppercase", color:"var(--gold)", textDecoration:"none", border:"1px solid var(--border)", padding:"7px 14px", borderRadius:"var(--radius)" }}>
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, letterSpacing: 1.5, textTransform: "uppercase", color: "var(--gold)", textDecoration: "none", border: "1px solid var(--border)", padding: "7px 14px", borderRadius: "var(--radius)" }}>
             <ExternalLink size={12} /> Preview
           </a>
         </div>
 
         {/* ── 1. Topbar ── */}
         <div className="nb-section">
-          <div className="nb-section-head" style={{ cursor:"default" }}>
+          <div className="nb-section-head">
             <span className="nb-section-title">Announcement <em>Topbar</em></span>
-            <button className={`ni-btn${navData.topbar?.visible ? " vis-on" : ""}`}
-              onClick={() => { setNavData(p => ({ ...p, topbar: { ...p.topbar, visible: !p.topbar.visible } })); mark(); }}>
+            <button
+              className={`ni-btn${navData.topbar?.visible ? " vis-on" : ""}`}
+              onClick={() => { setNavData(p => ({ ...p, topbar: { ...p.topbar, visible: !p.topbar.visible } })); mark(); }}
+            >
               {navData.topbar?.visible ? <Eye size={14} /> : <EyeOff size={14} />}
             </button>
           </div>
           <div className="nb-section-body">
             <label className="ni-edit-label">Topbar Text</label>
-            <input className="ni-edit-input" value={navData.topbar?.text || ""}
+            <input
+              className="ni-edit-input"
+              value={navData.topbar?.text || ""}
               onChange={e => { setNavData(p => ({ ...p, topbar: { ...p.topbar, text: e.target.value } })); mark(); }}
-              placeholder="FREE SHIPPING ON ORDERS ABOVE ₹50,000 · BIS HALLMARKED" />
+              placeholder="FREE SHIPPING ON ORDERS ABOVE ₹50,000 · BIS HALLMARKED"
+            />
           </div>
         </div>
 
         {/* ── 2. Nav Items ── */}
         <div className="nb-section">
-          <div className="nb-section-head" style={{ cursor:"default" }}>
+          <div className="nb-section-head">
             <span className="nb-section-title">Navigation <em>Links</em></span>
             <button className="btn btn-outline btn-sm" onClick={addNavItem}><Plus size={13} /> Add Link</button>
           </div>
           <div className="nb-section-body">
             {(navData.navItems || []).map((item) => (
               <div key={item._id}>
+                {/* Row */}
                 <div className="ni-row">
                   <GripVertical size={15} className="ni-drag" />
                   <span className="ni-name">{item.name}</span>
@@ -305,20 +488,36 @@ export default function NavBuilderPage() {
                   {item.hasMegaMenu && <span className="ni-badge mega">Mega Menu</span>}
                   {!item.visible && <span className="ni-badge hidden">Hidden</span>}
                   <div className="ni-actions">
+                    {/* Toggle visibility */}
                     <button className={`ni-btn${item.visible ? " vis-on" : ""}`}
                       onClick={() => toggleNavVisible(item._id)} title={item.visible ? "Hide" : "Show"}>
                       {item.visible ? <Eye size={13} /> : <EyeOff size={13} />}
                     </button>
-                    <button className="ni-btn" onClick={() => setEditingNavId(editingNavId === item._id ? null : item._id)} title="Edit">
+                    {/* Edit label/url */}
+                    <button className={`ni-btn${editingNavId === item._id ? " active" : ""}`}
+                      onClick={() => { setEditingNavId(editingNavId === item._id ? null : item._id); setMegaNavId(null); }}
+                      title="Edit">
                       ✏
                     </button>
+                    {/* Mega menu toggle — only for hasMegaMenu items */}
+                    {item.hasMegaMenu && (
+                      <button
+                        className={`ni-btn${megaNavId === item._id ? " active" : ""}`}
+                        onClick={() => { setMegaNavId(megaNavId === item._id ? null : item._id); setEditingNavId(null); }}
+                        title="Edit Mega Menu"
+                        style={{ width: "auto", padding: "0 8px", fontSize: 10, letterSpacing: 1, fontWeight: 600 }}
+                      >
+                        ⚡ Mega
+                      </button>
+                    )}
+                    {/* Delete */}
                     <button className="ni-btn danger" onClick={() => removeNavItem(item._id)} title="Delete">
                       <Trash2 size={13} />
                     </button>
                   </div>
                 </div>
 
-                {/* Inline edit */}
+                {/* Inline label/url edit */}
                 {editingNavId === item._id && (
                   <div className="ni-edit-form">
                     <div className="ni-edit-grid">
@@ -336,7 +535,10 @@ export default function NavBuilderPage() {
                       <div>
                         <label className="ni-edit-label">Has Mega Menu</label>
                         <select className="ni-edit-input" value={item.hasMegaMenu ? "yes" : "no"}
-                          onChange={e => updateNavItem(item._id, "hasMegaMenu", e.target.value === "yes")}>
+                          onChange={e => {
+                            updateNavItem(item._id, "hasMegaMenu", e.target.value === "yes");
+                            if (e.target.value === "no") setMegaNavId(null);
+                          }}>
                           <option value="no">No</option>
                           <option value="yes">Yes</option>
                         </select>
@@ -347,81 +549,30 @@ export default function NavBuilderPage() {
                     </div>
                   </div>
                 )}
+
+                {/* Mega panel — inline below this nav item */}
+                {megaNavId === item._id && item.hasMegaMenu && (
+                  <MegaPanel
+                    item={item}
+                    navId={item._id}
+                    onUpdateCol={handleMegaCol}
+                    onUpdateItem={updateMegaItem}
+                    onAddItem={addMegaItem}
+                    onRemoveItem={removeMegaItem}
+                    onUpdateImg={updateImg}
+                    onAddImg={addImg}
+                    onRemoveImg={removeImg}
+                    mark={mark}
+                  />
+                )}
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── 3. Mega Menu Columns ── */}
+        {/* ── 3. Search Hints ── */}
         <div className="nb-section">
-          <div className="nb-section-head" style={{ cursor:"default" }}>
-            <span className="nb-section-title">Mega Menu <em>Columns</em></span>
-          </div>
-          <div className="nb-section-body">
-            {(navData.megaCols || []).map((col) => (
-              <div key={col._id} className="mc-wrap">
-                <div className="mc-head">
-                  <GripVertical size={13} style={{ color:"var(--text3)" }} />
-                  <input className="mc-title-input" value={col.title || ""} placeholder="Column heading (leave blank for no heading)"
-                    onChange={e => updateMegaColTitle(col._id, e.target.value)} />
-                  <label style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, color:"var(--text2)", cursor:"pointer" }}>
-                    <input type="checkbox" checked={!!col.highlightLast}
-                      onChange={e => { setNavData(p => ({ ...p, megaCols: p.megaCols.map(c => c._id === col._id ? { ...c, highlightLast: e.target.checked } : c) })); mark(); }}
-                      style={{ accentColor:"var(--gold)" }} />
-                    Highlight last item
-                  </label>
-                </div>
-                <div className="mc-items">
-                  {col.items.map((item, si) => (
-                    <div key={si} className="mc-item-row">
-                      <input className="mc-item-input" value={item.label || ""}
-                        onChange={e => updateMegaItem(col._id, si, "label", e.target.value)}
-                        placeholder="Label" />
-                      <input className="mc-item-input" value={item.href || ""}
-                        onChange={e => updateMegaItem(col._id, si, "href", e.target.value)}
-                        placeholder="/listing?category=Ring" />
-                      <button className="ni-btn danger" onClick={() => removeMegaItem(col._id, si)}>
-                        <Trash2 size={11} />
-                      </button>
-                    </div>
-                  ))}
-                  <button className="btn btn-outline btn-sm" style={{ marginTop:8 }} onClick={() => addMegaItem(col._id)}>
-                    <Plus size={12} /> Add Item
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── 4. Mega Menu Images ── */}
-        <div className="nb-section">
-          <div className="nb-section-head" style={{ cursor:"default" }}>
-            <span className="nb-section-title">Mega Menu <em>Images</em></span>
-            <button className="btn btn-outline btn-sm" onClick={addImg}><Plus size={13} /> Add Image</button>
-          </div>
-          <div className="nb-section-body">
-            {(navData.megaImgs || []).map((img) => (
-              <div key={img._id} className="img-row">
-                <img src={img.src || "https://picsum.photos/80/50"} alt={img.alt} className="img-preview" />
-                <div>
-                  <label style={{ fontSize:9.5, fontWeight:600, letterSpacing:1.5, textTransform:"uppercase", color:"var(--text3)", display:"block", marginBottom:3 }}>Image URL</label>
-                  <input className="img-input" value={img.src} onChange={e => updateImg(img._id, "src", e.target.value)} placeholder="https://..." />
-                </div>
-                <div>
-                  <label style={{ fontSize:9.5, fontWeight:600, letterSpacing:1.5, textTransform:"uppercase", color:"var(--text3)", display:"block", marginBottom:3 }}>Alt & Link</label>
-                  <input className="img-input" value={img.alt} onChange={e => updateImg(img._id, "alt", e.target.value)} placeholder="Label text" style={{ marginBottom:4 }} />
-                  <input className="img-input" value={img.href} onChange={e => updateImg(img._id, "href", e.target.value)} placeholder="/listing" />
-                </div>
-                <button className="ni-btn danger" onClick={() => removeImg(img._id)}><Trash2 size={13} /></button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── 5. Search Hints ── */}
-        <div className="nb-section">
-          <div className="nb-section-head" style={{ cursor:"default" }}>
+          <div className="nb-section-head">
             <span className="nb-section-title">Search <em>Hints</em></span>
           </div>
           <div className="nb-section-body">
@@ -434,9 +585,13 @@ export default function NavBuilderPage() {
               ))}
             </div>
             <div className="hint-add-row">
-              <input className="hint-add-input" placeholder="Add a search hint…" value={newHint}
+              <input
+                className="hint-add-input"
+                placeholder="Add a search hint…"
+                value={newHint}
                 onChange={e => setNewHint(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && addHint()} />
+                onKeyDown={e => e.key === "Enter" && addHint()}
+              />
               <button className="btn btn-outline btn-sm" onClick={addHint}><Plus size={13} /> Add</button>
             </div>
           </div>
@@ -447,16 +602,19 @@ export default function NavBuilderPage() {
 
       {/* Save bar */}
       <div className="nb-save-bar">
-        <span style={{ fontSize:13, color:"var(--text2)", display:"flex", alignItems:"center", gap:8 }}>
-          <LinkIcon size={14} style={{ color:"var(--gold)" }} /> Navigation Config
-          {dirty && <span style={{ color:"var(--amber)", display:"flex", alignItems:"center", gap:4 }}><AlertCircle size={13} /> Unsaved</span>}
+        <span style={{ fontSize: 13, color: "var(--text2)", display: "flex", alignItems: "center", gap: 8 }}>
+          <LinkIcon size={14} style={{ color: "var(--gold)" }} /> Navigation Config
+          {dirty && <span style={{ color: "var(--amber)", display: "flex", alignItems: "center", gap: 4 }}><AlertCircle size={13} /> Unsaved</span>}
         </span>
-        <div style={{ display:"flex", gap:10 }}>
+        <div style={{ display: "flex", gap: 10 }}>
           <button className="btn btn-outline btn-md" onClick={reset}>
             <RotateCcw size={13} /> Reset
           </button>
           <button className="btn btn-primary btn-md" onClick={save} disabled={saving || !dirty}>
-            {saving ? <><Loader2 size={13} style={{ animation:"spin .8s linear infinite" }} /> Saving…</> : <><Save size={13} /> Save Changes</>}
+            {saving
+              ? <><Loader2 size={13} style={{ animation: "spin .8s linear infinite" }} /> Saving…</>
+              : <><Save size={13} /> Save Changes</>
+            }
           </button>
         </div>
       </div>

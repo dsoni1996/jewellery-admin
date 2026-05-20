@@ -671,7 +671,7 @@ function ProductForm({ form, setForm, err }) {
         <p style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>Select all that apply</p>
         <div className="occasion-chips">
           {OCCASIONS.map((occ) => (
-            <button key={occ} type="button" className={`occasion-chip${(form.occasion || []).includes(occ) ? " selected" : ""}`} onClick={() => toggleOccasion(occ)}>
+            <button key={occ} type="button" className={`occasion-chip${(form.occasion || []).includes(occ) ? " selected" : ""}`} onClick={() => toggleOcc(occ)}>
               {occ}
             </button>
           ))}
@@ -1177,7 +1177,7 @@ RENDER
                         <label className="pb-label" style={{ display: "block", marginBottom: 6 }}>
                           Slide Image
                         </label>
-                        <ImageUpload value={s.img || ""} onChange={(val) => updateSlide(i, "img", val)} aspect="16/7" placeholder="No slide image" />
+                        <ImageUpload value={s.img || ""} onChange={(val) =>  updateArr("heroSlides", i, "img", val)} aspect="16/7" placeholder="No slide image" />
                       </div>
                       <div className="wa-form-grid three">
                         <div className="wa-field">

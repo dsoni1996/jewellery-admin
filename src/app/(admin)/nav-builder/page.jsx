@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import {
   Save, RotateCcw, Plus, Trash2, Eye, EyeOff,
-  GripVertical, Loader2, Check, AlertCircle,
+  GripVertical, Loader2, Check, AlertCircle, Settings2,
   ExternalLink, Link as LinkIcon, ChevronDown, ChevronUp,
   Image as ImageIcon, Columns,
 } from "lucide-react";
@@ -32,9 +32,9 @@ const S = `
 .ni-name { font-size:13px; font-weight:500; color:var(--dark); flex:1; min-width:0; }
 .ni-href { font-size:11.5px; color:var(--text3); font-family:monospace; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .ni-actions { display:flex; gap:6px; flex-shrink:0; }
-.ni-btn { background:none; border:1px solid var(--border); border-radius:var(--radius); width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text2); transition:all .15s; flex-shrink:0; }
+.ni-btn { background:none; border:none; border-radius:var(--radius); width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text2); transition:all .15s; flex-shrink:0; }
 .ni-btn:hover { border-color:var(--gold); color:var(--gold); }
-.ni-btn.vis-on { color:var(--green); border-color:var(--green); }
+.ni-btn.vis-on { color:var(--gold); border-color:var(--gold); }
 .ni-btn.active { color:var(--blue); border-color:var(--blue); background:var(--blue-bg); }
 .ni-btn.danger:hover { border-color:var(--red); color:var(--red); }
 .ni-badge { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; padding:2px 7px; border-radius:2px; font-weight:500; white-space:nowrap; }
@@ -90,6 +90,7 @@ const S = `
 
 /* Save bar */
 .nb-save-bar { position:fixed; bottom:0; left:var(--sidebar-w); right:0; background:var(--white); border-top:1px solid var(--border); padding:14px 28px; display:flex; align-items:center; justify-content:space-between; z-index:50; box-shadow:0 -4px 20px rgba(44,26,14,.08); }
+@media(max-width:768px) { .nb-save-bar { left: 0; padding: 10px 16px; } }
 
 /* Empty state */
 .nb-empty { text-align:center; padding:28px 16px; color:var(--text3); font-size:13px; }
@@ -497,7 +498,7 @@ export default function NavBuilderPage() {
                     <button className={`ni-btn${editingNavId === item._id ? " active" : ""}`}
                       onClick={() => { setEditingNavId(editingNavId === item._id ? null : item._id); setMegaNavId(null); }}
                       title="Edit">
-                      ✏
+                      <Settings2 size={13} />
                     </button>
                     {/* Mega menu toggle — only for hasMegaMenu items */}
                     {item.hasMegaMenu && (

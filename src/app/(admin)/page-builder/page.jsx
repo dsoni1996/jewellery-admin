@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   GripVertical, Eye, EyeOff, Settings2, Trash2, Plus,
   Save, RotateCcw, Check, Loader2, ChevronDown, ChevronUp,
-  Layout, AlertCircle, ExternalLink, X, Menu, ArrowLeft,Upload
+  Layout, AlertCircle, ExternalLink, X, Menu, ArrowLeft,Upload 
 } from "lucide-react";
 import { api } from "../../../lib/api";
 
@@ -273,77 +273,140 @@ function SectionSettings({ section, onChange }) {
     case "hero_carousel": {
       const slides = s.slides || [{}];
       const updateSlide = (i, key, val) => {
-        const ns = [...slides]; ns[i] = { ...ns[i], [key]: val }; set("slides", ns);
+        const ns = [...slides];
+        ns[i] = { ...ns[i], [key]: val };
+        set("slides", ns);
       };
       return (
         <div>
           <p className="pb-section-settings-title">Slides</p>
-          <div className="pb-settings-grid full" style={{ marginBottom:8 }}>
+          <div className="pb-settings-grid full" style={{ marginBottom: 8 }}>
             <div className="pb-field">
               <label className="pb-label">Autoplay Delay (ms)</label>
-              <input className="pb-input" type="number" value={s.autoplayDelay||4500} onChange={e => set("autoplayDelay", Number(e.target.value))}/>
+              <input className="pb-input" type="number" value={s.autoplayDelay || 4500} onChange={(e) => set("autoplayDelay", Number(e.target.value))} />
             </div>
           </div>
           <div className="pb-slides-list">
             {slides.map((slide, i) => (
               <div key={i} className="pb-slide-row">
                 <div className="pb-slide-row-head">
-                  Slide {i+1}
-                  {slides.length > 1 && <button className="pb-icon-btn danger" onClick={() => set("slides", slides.filter((_,j)=>j!==i))}><X size={13}/></button>}
+                  Slide {i + 1}
+                  {slides.length > 1 && (
+                    <button
+                      className="pb-icon-btn danger"
+                      onClick={() =>
+                        set(
+                          "slides",
+                          slides.filter((_, j) => j !== i)
+                        )
+                      }>
+                      <X size={13} />
+                    </button>
+                  )}
                 </div>
-                  {/* ── Image uploader ── */}
-                <div style={{ marginBottom:10 }}>
-                  <label className="pb-label" style={{ display:"block", marginBottom:6 }}>Slide Image</label>
-                  <ImageUploader
-                    value={slide.img || ""}
-                    onChange={val => updateSlide(i, "img", val)}
-                    aspect="16/7"
-                    placeholder="No slide image"
-                  />
+                {/* ── Image uploader ── */}
+                <div style={{ marginBottom: 10 }}>
+                  <label className="pb-label" style={{ display: "block", marginBottom: 6 }}>
+                    Slide Image
+                  </label>
+                  <ImageUploader value={slide.img || ""} onChange={(val) => updateSlide(i, "img", val)} aspect="16/7" placeholder="No slide image" />
                 </div>
-                {[["eyebrow","Eyebrow Text"],["title","Title"],["titleEm","Italic Highlight"],["subtitle","Subtitle"],["ctaLabel","CTA Label"],["ctaHref","CTA Link"]].map(([k,l]) => (
-                  <div key={k} style={{ marginBottom:7 }}>
-                    <label className="pb-label" style={{ display:"block", marginBottom:3 }}>{l}</label>
-                    <input className="pb-input" value={slide[k]||""} onChange={e => updateSlide(i,k,e.target.value)} placeholder={k==="img"?"https://...":""} />
+                {[
+                  ["eyebrow", "Eyebrow Text"],
+                  ["title", "Title"],
+                  ["titleEm", "Italic Highlight"],
+                  ["subtitle", "Subtitle"],
+                  ["ctaLabel", "CTA Label"],
+                  ["ctaHref", "CTA Link"],
+                ].map(([k, l]) => (
+                  <div key={k} style={{ marginBottom: 7 }}>
+                    <label className="pb-label" style={{ display: "block", marginBottom: 3 }}>
+                      {l}
+                    </label>
+                    <input className="pb-input" value={slide[k] || ""} onChange={(e) => updateSlide(i, k, e.target.value)} placeholder={k === "img" ? "https://..." : ""} />
                   </div>
                 ))}
               </div>
             ))}
           </div>
-          <button className="pb-add-slide-btn" onClick={() => set("slides",[...slides,{}])}><Plus size={13}/> Add Slide</button>
+          <button className="pb-add-slide-btn" onClick={() => set("slides", [...slides, {}])}>
+            <Plus size={13} /> Add Slide
+          </button>
         </div>
       );
     }
 
-    case "trending": case "new_arrivals": case "product_row": {
+    case "trending":
+    case "new_arrivals":
+    case "product_row": {
       const pf = s.productFilter || {};
-      const setPf = (k,v) => set("productFilter",{...pf,[k]:v});
+      const setPf = (k, v) => set("productFilter", { ...pf, [k]: v });
       return (
         <div>
           <p className="pb-section-settings-title">Section Heading</p>
           <div className="pb-settings-grid">
-            <div className="pb-field"><label className="pb-label">Title</label><input className="pb-input" value={s.title||""} onChange={e=>set("title",e.target.value)} placeholder="Trending Now"/></div>
-            <div className="pb-field"><label className="pb-label">Subtitle</label><input className="pb-input" value={s.subtitle||""} onChange={e=>set("subtitle",e.target.value)}/></div>
+            <div className="pb-field">
+              <label className="pb-label">Title</label>
+              <input className="pb-input" value={s.title || ""} onChange={(e) => set("title", e.target.value)} placeholder="Trending Now" />
+            </div>
+            <div className="pb-field">
+              <label className="pb-label">Subtitle</label>
+              <input className="pb-input" value={s.subtitle || ""} onChange={(e) => set("subtitle", e.target.value)} />
+            </div>
           </div>
-          <div className="pb-settings-grid full"><div className="pb-field"><label className="pb-label">CTA Text</label><input className="pb-input" value={s.ctaText||""} onChange={e=>set("ctaText",e.target.value)} placeholder="View All"/></div></div>
-          <div className="pb-settings-grid full"><div className="pb-field"><label className="pb-label">CTA Link</label><input className="pb-input" value={s.ctaLink||""} onChange={e=>set("ctaLink",e.target.value)} placeholder="/listing"/></div></div>
-          <p className="pb-section-settings-title" style={{marginTop:14}}>Product Filter</p>
+          <div className="pb-settings-grid full">
+            <div className="pb-field">
+              <label className="pb-label">CTA Text</label>
+              <input className="pb-input" value={s.ctaText || ""} onChange={(e) => set("ctaText", e.target.value)} placeholder="View All" />
+            </div>
+          </div>
+          <div className="pb-settings-grid full">
+            <div className="pb-field">
+              <label className="pb-label">CTA Link</label>
+              <input className="pb-input" value={s.ctaLink || ""} onChange={(e) => set("ctaLink", e.target.value)} placeholder="/listing" />
+            </div>
+          </div>
+          <p className="pb-section-settings-title" style={{ marginTop: 14 }}>
+            Product Filter
+          </p>
           <div className="pb-settings-grid three">
-            <div className="pb-field"><label className="pb-label">Category</label>
-              <select className="pb-select" value={pf.category||""} onChange={e=>setPf("category",e.target.value)}>
-                <option value="">All</option>{CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
-              </select></div>
-            <div className="pb-field"><label className="pb-label">Purity</label>
-              <select className="pb-select" value={pf.purity||""} onChange={e=>setPf("purity",e.target.value)}>
-                <option value="">Any</option>{PURITIES.map(p=><option key={p} value={p}>{p}</option>)}
-              </select></div>
-            <div className="pb-field"><label className="pb-label">Limit</label>
-              <input className="pb-input" type="number" value={pf.limit||6} min={2} max={12} onChange={e=>setPf("limit",Number(e.target.value))}/></div>
+            <div className="pb-field">
+              <label className="pb-label">Category</label>
+              <select className="pb-select" value={pf.category || ""} onChange={(e) => setPf("category", e.target.value)}>
+                <option value="">All</option>
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="pb-field">
+              <label className="pb-label">Purity</label>
+              <select className="pb-select" value={pf.purity || ""} onChange={(e) => setPf("purity", e.target.value)}>
+                <option value="">Any</option>
+                {PURITIES.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="pb-field">
+              <label className="pb-label">Limit</label>
+              <input className="pb-input" type="number" value={pf.limit || 6} min={2} max={12} onChange={(e) => setPf("limit", Number(e.target.value))} />
+            </div>
           </div>
-          <div style={{display:"flex",gap:16,marginTop:8,flexWrap:"wrap"}}>
-            {[["isBestSeller","Best Sellers"],["isNewArrival","New Arrivals"],["isFeatured","Featured"],["isWedding","Bridal"]].map(([k,lbl])=>(
-              <label key={k} style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer",fontSize:12.5,color:"var(--text2)"}}>
-                <input type="checkbox" checked={!!pf[k]} onChange={e=>setPf(k,e.target.checked)} style={{accentColor:"var(--gold)",width:14,height:14}}/>{lbl}
+          <div style={{ display: "flex", gap: 16, marginTop: 8, flexWrap: "wrap" }}>
+            {[
+              ["isBestSeller", "Best Sellers"],
+              ["isNewArrival", "New Arrivals"],
+              ["isFeatured", "Featured"],
+              ["isWedding", "Bridal"],
+            ].map(([k, lbl]) => (
+              <label key={k} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 12.5, color: "var(--text2)" }}>
+                <input type="checkbox" checked={!!pf[k]} onChange={(e) => setPf(k, e.target.checked)} style={{ accentColor: "var(--gold)", width: 14, height: 14 }} />
+                {lbl}
               </label>
             ))}
           </div>
@@ -353,51 +416,170 @@ function SectionSettings({ section, onChange }) {
 
     case "collection_grid": {
       const cols = s.collections || [{}];
-      const updateCol = (i,key,val) => { const nc=[...cols]; nc[i]={...nc[i],[key]:val}; set("collections",nc); };
+      const updateCol = (i, key, val) => {
+        const nc = [...cols];
+        nc[i] = { ...nc[i], [key]: val };
+        set("collections", nc);
+      };
       return (
         <div>
           <p className="pb-section-settings-title">Section Heading</p>
           <div className="pb-settings-grid">
-            <div className="pb-field"><label className="pb-label">Title</label><input className="pb-input" value={s.title||""} onChange={e=>set("title",e.target.value)}/></div>
-            <div className="pb-field"><label className="pb-label">Subtitle</label><input className="pb-input" value={s.subtitle||""} onChange={e=>set("subtitle",e.target.value)}/></div>
+            <div className="pb-field">
+              <label className="pb-label">Title</label>
+              <input className="pb-input" value={s.title || ""} onChange={(e) => set("title", e.target.value)} />
+            </div>
+            <div className="pb-field">
+              <label className="pb-label">Subtitle</label>
+              <input className="pb-input" value={s.subtitle || ""} onChange={(e) => set("subtitle", e.target.value)} />
+            </div>
           </div>
-          <p className="pb-section-settings-title" style={{marginTop:14}}>Collections ({cols.length})</p>
-          {cols.map((col,i)=>(
-            <div key={i} className="pb-slide-row" style={{marginBottom:8}}>
+          <p className="pb-section-settings-title" style={{ marginTop: 14 }}>
+            Collections ({cols.length})
+          </p>
+          {cols.map((col, i) => (
+            <div key={i} className="pb-slide-row" style={{ marginBottom: 8 }}>
               <div className="pb-slide-row-head">
-                Collection {i+1}
-                <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                  <select className="pb-select" style={{width:"auto",padding:"3px 8px",fontSize:11}} value={col.span||"small"} onChange={e=>updateCol(i,"span",e.target.value)}>
-                    <option value="large">Large</option><option value="small">Small</option>
+                Collection {i + 1}
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <select className="pb-select" style={{ width: "auto", padding: "3px 8px", fontSize: 11 }} value={col.span || "small"} onChange={(e) => updateCol(i, "span", e.target.value)}>
+                    <option value="large">Large</option>
+                    <option value="small">Small</option>
                   </select>
-                  {cols.length>1 && <button className="pb-icon-btn danger" onClick={()=>set("collections",cols.filter((_,j)=>j!==i))}><X size={13}/></button>}
+                  {cols.length > 1 && (
+                    <button
+                      className="pb-icon-btn danger"
+                      onClick={() =>
+                        set(
+                          "collections",
+                          cols.filter((_, j) => j !== i)
+                        )
+                      }>
+                      <X size={13} />
+                    </button>
+                  )}
                 </div>
               </div>
-                {/* ── Image uploader ── */}
-              <div style={{ marginBottom:10 }}>
-                <label className="pb-label" style={{ display:"block", marginBottom:6 }}>Collection Image</label>
-                <ImageUploader
-                  value={col.img || ""}
-                  onChange={val => updateCol(i, "img", val)}
-                  aspect="16/7"
-                  placeholder="No image"
-                />
+              {/* ── Image uploader ── */}
+              <div style={{ marginBottom: 10 }}>
+                <label className="pb-label" style={{ display: "block", marginBottom: 6 }}>
+                  Collection Image
+                </label>
+                <ImageUploader value={col.img || ""} onChange={(val) => updateCol(i, "img", val)} aspect="16/7" placeholder="No image" />
               </div>
-              {[ ["title","Title"],["sub","Subtitle"],["href","Link"]].map(([k,l])=>(
-                <div key={k} style={{marginBottom:6}}>
-                  <label className="pb-label" style={{display:"block",marginBottom:2}}>{l}</label>
-                  <input className="pb-input" value={col[k]||""} onChange={e=>updateCol(i,k,e.target.value)} placeholder={k==="href"?"/listing":""}/>
+              {[
+                ["title", "Title"],
+                ["sub", "Subtitle"],
+                ["href", "Link"],
+              ].map(([k, l]) => (
+                <div key={k} style={{ marginBottom: 6 }}>
+                  <label className="pb-label" style={{ display: "block", marginBottom: 2 }}>
+                    {l}
+                  </label>
+                  <input className="pb-input" value={col[k] || ""} onChange={(e) => updateCol(i, k, e.target.value)} placeholder={k === "href" ? "/listing" : ""} />
                 </div>
               ))}
             </div>
           ))}
-          <button className="pb-add-slide-btn" onClick={()=>set("collections",[...cols,{}])}><Plus size={13}/> Add Collection</button>
+          <button className="pb-add-slide-btn" onClick={() => set("collections", [...cols, {}])}>
+            <Plus size={13} /> Add Collection
+          </button>
+        </div>
+      );
+    }
+
+    case "categories": {
+      const cats = s.categories || [];
+      const updateCat = (i, key, val) => {
+        const nc = [...cats];
+        nc[i] = { ...nc[i], [key]: val };
+        set("categories", nc);
+      };
+      const addCat = () => set("categories", [...cats, { id: `cat_${Date.now()}`, label: "", href: "/listing", img: "", visible: true }]);
+      const removeCat = (i) =>
+        set(
+          "categories",
+          cats.filter((_, idx) => idx !== i)
+        );
+
+      return (
+        <div>
+          <p className="pb-section-settings-title">Section Heading</p>
+          <div className="pb-settings-grid">
+            <div className="pb-field">
+              <label className="pb-label">Title</label>
+              <input className="pb-input" value={s.title || ""} onChange={(e) => set("title", e.target.value)} placeholder="Shop by Category" />
+            </div>
+            <div className="pb-field">
+              <label className="pb-label">Subtitle</label>
+              <input className="pb-input" value={s.subtitle || ""} onChange={(e) => set("subtitle", e.target.value)} placeholder="Find your perfect piece" />
+            </div>
+          </div>
+
+          <p className="pb-section-settings-title" style={{ marginTop: 14 }}>
+            Categories ({cats.length})
+          </p>
+
+          {cats.map((cat, i) => (
+            <div key={i} className="pb-slide-row" style={{ marginBottom: 8 }}>
+              <div className="pb-slide-row-head">
+                <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {cat.img && <img src={cat.img} alt="" style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border)" }} />}
+                  {cat.label || `Category ${i + 1}`}
+                </span>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "var(--text2)", cursor: "pointer" }}>
+                    <input type="checkbox" checked={cat.visible !== false} onChange={(e) => updateCat(i, "visible", e.target.checked)} style={{ accentColor: "var(--gold)", width: 13, height: 13 }} />
+                    Visible
+                  </label>
+                  <button className="pb-icon-btn danger" onClick={() => removeCat(i)} type="button">
+                    {/* Trash2 icon — import from lucide already done in page builder */}✕
+                  </button>
+                </div>
+              </div>
+
+              <div className="pb-settings-grid">
+                <div className="pb-field">
+                  <label className="pb-label">Category Name *</label>
+                  <input className="pb-input" value={cat.label || ""} onChange={(e) => updateCat(i, "label", e.target.value)} placeholder="Rings" />
+                </div>
+                <div className="pb-field">
+                  <label className="pb-label">Link (URL)</label>
+                  <input className="pb-input" value={cat.href || ""} onChange={(e) => updateCat(i, "href", e.target.value)} placeholder="/listing?category=Ring" />
+                </div>
+              </div>
+
+              {/* Image uploader — same as banner */}
+             <div className="pb-field" style={{ marginTop: 6 }}>
+  <label className="pb-label">Image</label>
+  <ImageUploader
+    value={cat.img || ""}
+    onChange={(url) => updateCat(i, "img", url)}
+    aspect="1/1"
+    placeholder="No category image"
+  />
+</div>
+            </div>
+          ))}
+
+          <button className="pb-add-slide-btn" onClick={addCat} type="button">
+            + Add Category
+          </button>
+
+          <p style={{ fontSize: 11, color: "var(--text3)", marginTop: 10 }}>Tip: Use circular/square images (min 200×200px) for best results.</p>
         </div>
       );
     }
 
     case "newsletter":
-      return (<div className="pb-settings-grid full"><div className="pb-field"><label className="pb-label">Offer Text</label><input className="pb-input" value={s.offerText||""} onChange={e=>set("offerText",e.target.value)} placeholder="Get 5% off your first order"/></div></div>);
+      return (
+        <div className="pb-settings-grid full">
+          <div className="pb-field">
+            <label className="pb-label">Offer Text</label>
+            <input className="pb-input" value={s.offerText || ""} onChange={(e) => set("offerText", e.target.value)} placeholder="Get 5% off your first order" />
+          </div>
+        </div>
+      );
 
     // case "banner_single":
     //   return (
@@ -416,60 +598,61 @@ function SectionSettings({ section, onChange }) {
       return (
         <div>
           <p className="pb-section-settings-title">Banner Image</p>
-          <ImageUploader
-            value={s.bannerImg || ""}
-            onChange={val => set("bannerImg", val)}
-              aspect="16/7"
-            placeholder="No banner image"
-          />
-          <div className="pb-settings-grid" style={{marginTop:12}}>
-            <div className="pb-field"><label className="pb-label">Title</label>
-              <input className="pb-input" value={s.bannerTitle||""} onChange={e=>set("bannerTitle",e.target.value)}/></div>
-            <div className="pb-field"><label className="pb-label">CTA Text</label>
-              <input className="pb-input" value={s.bannerCta||""} onChange={e=>set("bannerCta",e.target.value)}/></div>
+          <ImageUploader value={s.bannerImg || ""} onChange={(val) => set("bannerImg", val)} aspect="16/7" placeholder="No banner image" />
+          <div className="pb-settings-grid" style={{ marginTop: 12 }}>
+            <div className="pb-field">
+              <label className="pb-label">Title</label>
+              <input className="pb-input" value={s.bannerTitle || ""} onChange={(e) => set("bannerTitle", e.target.value)} />
+            </div>
+            <div className="pb-field">
+              <label className="pb-label">CTA Text</label>
+              <input className="pb-input" value={s.bannerCta || ""} onChange={(e) => set("bannerCta", e.target.value)} />
+            </div>
           </div>
           <div className="pb-settings-grid full">
-            <div className="pb-field"><label className="pb-label">CTA Link</label>
-              <input className="pb-input" value={s.bannerHref||""} onChange={e=>set("bannerHref",e.target.value)}/></div>
+            <div className="pb-field">
+              <label className="pb-label">CTA Link</label>
+              <input className="pb-input" value={s.bannerHref || ""} onChange={(e) => set("bannerHref", e.target.value)} />
+            </div>
           </div>
         </div>
       );
 
-         case "banner_split":
+    case "banner_split":
       return (
         <div>
           <p className="pb-section-settings-title">Left Panel</p>
-          <ImageUploader
-            value={s.leftImg || ""}
-            onChange={val => set("leftImg", val)}
-              aspect="16/7"
-            placeholder="Left image"
-          />
-          <div className="pb-settings-grid" style={{marginTop:10}}>
-            <div className="pb-field"><label className="pb-label">Title</label>
-              <input className="pb-input" value={s.leftTitle||""} onChange={e=>set("leftTitle",e.target.value)}/></div>
-            <div className="pb-field"><label className="pb-label">Link</label>
-              <input className="pb-input" value={s.leftHref||""} onChange={e=>set("leftHref",e.target.value)} placeholder="/listing"/></div>
+          <ImageUploader value={s.leftImg || ""} onChange={(val) => set("leftImg", val)} aspect="16/7" placeholder="Left image" />
+          <div className="pb-settings-grid" style={{ marginTop: 10 }}>
+            <div className="pb-field">
+              <label className="pb-label">Title</label>
+              <input className="pb-input" value={s.leftTitle || ""} onChange={(e) => set("leftTitle", e.target.value)} />
+            </div>
+            <div className="pb-field">
+              <label className="pb-label">Link</label>
+              <input className="pb-input" value={s.leftHref || ""} onChange={(e) => set("leftHref", e.target.value)} placeholder="/listing" />
+            </div>
           </div>
- 
-          <p className="pb-section-settings-title" style={{marginTop:14}}>Right Panel</p>
-          <ImageUploader
-            value={s.rightImg || ""}
-            onChange={val => set("rightImg", val)}
-            aspect="16/7"
-            placeholder="Right image"
-          />
-          <div className="pb-settings-grid" style={{marginTop:10}}>
-            <div className="pb-field"><label className="pb-label">Title</label>
-              <input className="pb-input" value={s.rightTitle||""} onChange={e=>set("rightTitle",e.target.value)}/></div>
-            <div className="pb-field"><label className="pb-label">Link</label>
-              <input className="pb-input" value={s.rightHref||""} onChange={e=>set("rightHref",e.target.value)} placeholder="/listing"/></div>
+
+          <p className="pb-section-settings-title" style={{ marginTop: 14 }}>
+            Right Panel
+          </p>
+          <ImageUploader value={s.rightImg || ""} onChange={(val) => set("rightImg", val)} aspect="16/7" placeholder="Right image" />
+          <div className="pb-settings-grid" style={{ marginTop: 10 }}>
+            <div className="pb-field">
+              <label className="pb-label">Title</label>
+              <input className="pb-input" value={s.rightTitle || ""} onChange={(e) => set("rightTitle", e.target.value)} />
+            </div>
+            <div className="pb-field">
+              <label className="pb-label">Link</label>
+              <input className="pb-input" value={s.rightHref || ""} onChange={(e) => set("rightHref", e.target.value)} placeholder="/listing" />
+            </div>
           </div>
         </div>
       );
 
     default:
-      return <p style={{fontSize:12,color:"var(--text3)",fontStyle:"italic"}}>No editable settings for this section type.</p>;
+      return <p style={{ fontSize: 12, color: "var(--text3)", fontStyle: "italic" }}>No editable settings for this section type.</p>;
   }
 }
 
